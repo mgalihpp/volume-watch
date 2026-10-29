@@ -1,16 +1,24 @@
-import { useState } from 'react'
 import { BellIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import type { AlertEntry } from '@/hooks/usePoolMonitor'
+import { useStored } from '@/hooks/useStored'
 import { usdShort } from '@/lib/meteora'
 
+interface Props {
+  alerts: AlertEntry[]
+  /** Waktu cek terakhir bot VPS (detik); ada berarti riwayat datang dari bot, bukan dari tab ini. */
+  botUpdated?: number
+}
+
 /** Tombol lonceng di header; angka di badge = alert yang belum dilihat. */
-export function AlertMenu({ alerts }: { alerts: AlertEntry[] }) {
-  const [seen, setSeen] = useState(0)
-  const unseen = alerts.length ? alerts[0].id - seen : 0
+export function AlertMenu({ alerts, botUpdated }: Props) {
+  const [{ seen }, setSeen] = useStored('alerts-seen', { seen: 0 })
+  const unseen = alerts.filter((a) => a.id > seen).length
+  const botAlive = botUpdated != null && Date.now() / 1000 - botUpdated < 300
+
   return (
-    <Sheet onOpenChange={(o) => o && setSeen(alerts[0]?.id ?? 0)}>
+    <Sheet onOpenChange={(o) => o && alerts[0] && setSeen({ seen: alerts[0].id })}>
       <SheetTrigger render={<Button variant="outline" size="icon" className="relative" aria-label={`Riwayat alert${unseen ? `, ${unseen} baru` : ''}`} />}>
         <BellIcon />
         {unseen > 0 && (
@@ -22,7 +30,16 @@ export function AlertMenu({ alerts }: { alerts: AlertEntry[] }) {
       <SheetContent className="gap-5 p-6 sm:max-w-[380px]">
         <SheetHeader className="p-0">
           <SheetTitle className="text-lg font-semibold">Riwayat alert</SheetTitle>
-          <SheetDescription>Lonjakan volume sejak halaman ini dibuka.</SheetDescription>
+          <SheetDescription>
+            {botUpdated == null ? (
+              'Lonjakan volume sejak halaman ini dibuka.'
+            ) : (
+              <span className="flex items-center gap-2">
+                <span className={botAlive ? 'size-1.5 rounded-full bg-up' : 'size-1.5 rounded-full bg-down'} />
+                {botAlive ? 'Dari bot VPS, tetap tercatat saat website ditutup.' : 'Bot VPS tidak merespons. Riwayat mungkin tertinggal.'}
+              </span>
+            )}
+          </SheetDescription>
         </SheetHeader>
         {alerts.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed px-6 py-10 text-center text-muted-foreground">
@@ -33,7 +50,7 @@ export function AlertMenu({ alerts }: { alerts: AlertEntry[] }) {
           <ul className="-mx-3 flex flex-col overflow-y-auto">
             {alerts.map((a) => (
               <li key={a.id} className="flex items-start gap-3 rounded-xl px-3 py-3">
-                <span className="mt-1.5 size-2 shrink-0 rounded-full bg-amber-strong" />
+                <span className={a.id > seen ? 'mt-1.5 size-2 shrink-0 rounded-full bg-amber-strong' : 'mt-1.5 size-2 shrink-0 rounded-full bg-muted-foreground/30'} />
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="flex items-center justify-between gap-3 text-sm font-medium">
                     {a.pool}

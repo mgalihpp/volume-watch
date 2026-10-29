@@ -24,7 +24,7 @@ export function TokenPair({ pair, size = 'sm' }: { pair: string; size?: 'sm' | '
   const s = size === 'lg' ? 'size-7 text-[28px]' : 'size-5 text-[20px]'
   return (
     <span className="flex shrink-0 items-center" aria-hidden>
-      <Token symbol={base} className={s} />
+      <Token symbol={base} className={cn(s, 'relative z-10')} />
       <Token symbol={quote} className={cn(s, size === 'lg' ? '-ml-2.5' : '-ml-1.5')} />
     </span>
   )

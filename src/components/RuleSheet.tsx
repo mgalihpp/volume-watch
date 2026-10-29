@@ -16,7 +16,8 @@ const FIELDS: { key: keyof Rule; label: string; unit: string; min: number; step:
 
 const toDraft = (r: Rule) => ({ mult: String(r.mult), baseline: String(r.baseline), minUsd: String(r.minUsd), interval: String(r.interval) })
 
-export function RuleSheet({ rule, onSave }: { rule: Rule; onSave: (rule: Rule) => void }) {
+/** locked: aturan datang dari bot VPS (.env), jadi hanya ditampilkan. */
+export function RuleSheet({ rule, onSave, locked }: { rule: Rule; onSave: (rule: Rule) => void; locked?: boolean }) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<Record<keyof Rule, string>>(() => toDraft(rule))
   const [perm, setPerm] = useState(() => ('Notification' in window ? Notification.permission : 'denied'))
@@ -50,7 +51,11 @@ export function RuleSheet({ rule, onSave }: { rule: Rule; onSave: (rule: Rule) =
       <SheetContent className="gap-7 p-7 sm:max-w-[420px]">
         <SheetHeader className="p-0">
           <SheetTitle className="text-lg font-semibold">Aturan alert</SheetTitle>
-          <SheetDescription>Alert dikirim saat volume 1 menit melewati semua batas ini.</SheetDescription>
+          <SheetDescription>
+            {locked
+              ? 'Mengikuti bot Telegram di VPS. Ubah di file .env bot, lalu pm2 restart volume-alert.'
+              : 'Alert dikirim saat volume 1 menit melewati semua batas ini.'}
+          </SheetDescription>
         </SheetHeader>
 
         <div className="flex flex-col gap-4">
@@ -67,6 +72,7 @@ export function RuleSheet({ rule, onSave }: { rule: Rule; onSave: (rule: Rule) =
                   min={f.min}
                   step={f.step}
                   value={draft[f.key]}
+                  readOnly={locked}
                   onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
                   aria-invalid={!(parseFloat(draft[f.key]) >= f.min)}
                   className="h-9 rounded-lg pr-14 text-right font-medium tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
@@ -85,9 +91,11 @@ export function RuleSheet({ rule, onSave }: { rule: Rule; onSave: (rule: Rule) =
           <Switch id="rule-notif" checked={perm === 'granted'} disabled={perm === 'denied'} onCheckedChange={toggleNotif} />
         </div>
 
-        <Button onClick={save} disabled={!valid} className="h-10 w-full">
-          Simpan
-        </Button>
+        {!locked && (
+          <Button onClick={save} disabled={!valid} className="h-10 w-full">
+            Simpan
+          </Button>
+        )}
       </SheetContent>
     </Sheet>
   )

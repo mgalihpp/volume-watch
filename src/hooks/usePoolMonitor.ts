@@ -102,7 +102,7 @@ export function usePoolMonitor(rule: Rule) {
         if (isSpike && now - t.lastAlert >= COOLDOWN_MS) {
           t.lastAlert = now
           fresh.push({
-            id: ++alertId.current,
+            id: Date.now() + ++alertId.current, // waktu dalam ms, dipakai juga untuk badge "belum dilihat"
             time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
             pool: POOLS[s.address],
             vol: vol1m,

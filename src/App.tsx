@@ -5,6 +5,7 @@ import { PoolList } from '@/components/PoolList'
 import { PriceChart, type ChartType } from '@/components/PriceChart'
 import { RuleSheet } from '@/components/RuleSheet'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { useBotData } from '@/hooks/useBotData'
 import { useCandles } from '@/hooks/useCandles'
 import { useDark } from '@/hooks/useDark'
 import { usePoolMonitor } from '@/hooks/usePoolMonitor'
@@ -16,7 +17,9 @@ const DEFAULT_CHART = { addr: POOL_ADDRESSES[2], tf: '1h' as Timeframe, type: 'c
 
 export default function App() {
   const { dark, setMode } = useDark()
-  const [rule, setRule] = useStored<Rule>('rule', DEFAULT_RULE)
+  const [localRule, setRule] = useStored<Rule>('rule', DEFAULT_RULE)
+  const bot = useBotData()
+  const rule = bot?.rule ?? localRule // di VPS aturan mengikuti bot Telegram
   const [saved, setChart] = useStored('chart', DEFAULT_CHART)
   const chart = {
     addr: saved.addr in POOLS ? saved.addr : DEFAULT_CHART.addr,
@@ -48,8 +51,8 @@ export default function App() {
             </span>
           </span>
           <ThemeToggle dark={dark} setMode={setMode} />
-          <AlertMenu alerts={alerts} />
-          <RuleSheet rule={rule} onSave={setRule} />
+          <AlertMenu alerts={bot ? bot.alerts : alerts} botUpdated={bot?.updated} />
+          <RuleSheet rule={rule} onSave={setRule} locked={!!bot} />
         </div>
       </header>
 
