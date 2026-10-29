@@ -95,7 +95,7 @@ export async function fetchCandles(address: string, tf: Timeframe, end = Math.fl
   return (j.data ?? []).filter((c) => c.open > 0)
 }
 
-/** Meteora tidak punya candle 1m; candle 1m dicatat sendiri oleh bot VPS (24 jam terakhir). */
+/** Meteora tidak punya candle 1m; candle 1m dicatat sendiri oleh bot VPS (7 hari terakhir). */
 async function fetchBotMinutes(address: string): Promise<Candle[]> {
   const rows = await getJSON<[number, number, number, number, number, number][]>(`./data/minutes-${address}.json`)
   return rows.map(([timestamp, open, high, low, close, volume]) => ({ timestamp, open, high, low, close, volume }))
