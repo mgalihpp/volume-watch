@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 export function AlertRow({ alert: a, fresh }: { alert: AlertEntry; fresh: boolean }) {
   const { pair, bin } = splitName(a.pool)
   return (
-    <li className={cn('flex items-center gap-3 rounded-2xl px-3 py-3', fresh && 'bg-muted')}>
+    <li className={cn('flex items-center gap-3 rounded-lg px-3 py-3', fresh && 'bg-muted')}>
       <span className={cn('size-2 shrink-0 rounded-full', fresh ? 'bg-amber-strong' : 'bg-foreground/20')} />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate text-[13px] font-semibold">
@@ -60,7 +60,7 @@ export function AlertsPage({ alerts, botUpdated }: { alerts: AlertEntry[]; botUp
           </p>
         </div>
         {pools.length > 1 && (
-          <div role="tablist" aria-label="Pool" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 md:mx-0 md:w-fit md:gap-0.5 md:rounded-full md:bg-muted md:p-1">
+          <div role="tablist" aria-label="Pool" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 md:mx-0 md:w-fit md:gap-0.5">
             {['', ...pools].map((p) => (
               <button
                 key={p}
@@ -69,8 +69,8 @@ export function AlertsPage({ alerts, botUpdated }: { alerts: AlertEntry[]; botUp
                 aria-selected={filter === p}
                 onClick={() => setFilter(p)}
                 className={cn(
-                  'shrink-0 rounded-full px-4 py-2 text-xs font-bold whitespace-nowrap transition-colors',
-                  filter === p ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground md:bg-transparent',
+                  'shrink-0 rounded-md px-3.5 py-1.5 text-xs font-bold whitespace-nowrap transition-colors',
+                  filter === p ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
               >
                 {p || 'Semua'}
@@ -81,14 +81,14 @@ export function AlertsPage({ alerts, botUpdated }: { alerts: AlertEntry[]; botUp
       </div>
 
       {list.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed px-6 py-16 text-center text-muted-foreground">
+        <div className="flex flex-col items-center gap-3 border border-dashed px-6 py-16 text-center text-muted-foreground">
           <BellIcon className="size-5" />
           <span className="text-[13px]">Belum ada lonjakan. Alert muncul di sini saat bar pool penuh.</span>
         </div>
       ) : (
         <>
-          <div className="hidden rounded-3xl border bg-card px-6 py-2 md:block">
-            <div className="grid grid-cols-[1.3fr_1fr_1fr_1fr] gap-4 py-3.5 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          <div className="hidden border-y md:block">
+            <div className="grid grid-cols-[1.3fr_1fr_1fr_1fr] gap-4 px-2 py-3.5 text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
               <span>Pool</span>
               <span>Volume 1 menit</span>
               <span>Dibanding normal</span>
@@ -97,11 +97,11 @@ export function AlertsPage({ alerts, botUpdated }: { alerts: AlertEntry[]; botUp
             {list.map((a) => {
               const { pair, bin } = splitName(a.pool)
               return (
-                <div key={a.id} className="grid grid-cols-[1.3fr_1fr_1fr_1fr] items-center gap-4 border-t py-4 text-sm tabular-nums">
+                <div key={a.id} className="grid grid-cols-[1.3fr_1fr_1fr_1fr] items-center gap-4 border-t px-2 py-3.5 text-sm tabular-nums">
                   <span className="flex items-center gap-3 font-semibold">
                     <span className={cn('size-2 rounded-full', a.id > seenAtOpen ? 'bg-amber-strong' : 'bg-foreground/20')} />
                     {pair}
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{bin}</span>
+                    <span className="text-[11px] font-medium text-muted-foreground">{bin}</span>
                   </span>
                   <span className="font-semibold">{usdShort(a.vol)}</span>
                   <span className="font-bold text-amber-strong">{a.ratio}</span>
@@ -110,15 +110,15 @@ export function AlertsPage({ alerts, botUpdated }: { alerts: AlertEntry[]; botUp
               )
             })}
           </div>
-          <ul className="flex flex-col gap-2.5 md:hidden">
+          <ul className="-mx-4 flex flex-col border-y md:hidden">
             {list.map((a) => {
               const { pair, bin } = splitName(a.pool)
               return (
-                <li key={a.id} className="flex flex-col gap-2.5 rounded-2xl border bg-card p-4">
+                <li key={a.id} className="flex flex-col gap-2 border-b px-4 py-3.5 last:border-b-0">
                   <span className="flex items-center gap-2">
                     <span className={cn('size-2 rounded-full', a.id > seenAtOpen ? 'bg-amber-strong' : 'bg-foreground/20')} />
                     <span className="text-sm font-bold">{pair}</span>
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">{bin}</span>
+                    <span className="text-[11px] font-medium text-muted-foreground">{bin}</span>
                     <span className="ml-auto text-[11px] text-muted-foreground">{a.time}</span>
                   </span>
                   <span className="text-[13px] text-muted-foreground tabular-nums">

@@ -53,7 +53,7 @@ export function ManagePools({ open, onOpenChange, pools, onChanged }: Props) {
         onOpenChange(o)
       }}
     >
-      <SheetContent side={mobile ? 'bottom' : 'right'} className="max-h-[92dvh] w-full gap-6 overflow-y-auto rounded-t-[28px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:max-h-none sm:rounded-none sm:max-w-[420px] sm:p-6">
+      <SheetContent side={mobile ? 'bottom' : 'right'} className="max-h-[92dvh] w-full gap-6 overflow-y-auto rounded-t-2xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:max-h-none sm:rounded-none sm:max-w-[420px] sm:p-6">
         <SheetHeader className="p-0">
           <SheetTitle className="text-lg font-semibold">Kelola pool</SheetTitle>
           <SheetDescription>Pool Meteora DLMM yang dipantau website dan bot Telegram.</SheetDescription>

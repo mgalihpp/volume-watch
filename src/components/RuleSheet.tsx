@@ -75,11 +75,11 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
         setOpen(o)
       }}
     >
-      <SheetTrigger render={<Button size="lg" className="h-10 rounded-full px-3 font-bold sm:px-5" aria-label="Aturan alert" />}>
+      <SheetTrigger render={<Button size="lg" className="h-8 rounded-lg px-2.5 font-bold sm:px-3.5" aria-label="Aturan alert" />}>
         <SlidersHorizontalIcon />
         <span className="hidden sm:inline">Aturan alert</span>
       </SheetTrigger>
-      <SheetContent side={mobile ? 'bottom' : 'right'} className="max-h-[92dvh] gap-5 overflow-y-auto rounded-t-[28px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:max-h-none sm:gap-7 sm:rounded-none sm:p-7 sm:max-w-[420px]">
+      <SheetContent side={mobile ? 'bottom' : 'right'} className="max-h-[92dvh] gap-5 overflow-y-auto rounded-t-2xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:max-h-none sm:gap-7 sm:rounded-none sm:p-7 sm:max-w-[420px]">
         <SheetHeader className="p-0">
           <SheetTitle className="text-2xl font-bold tracking-tight">Aturan alert</SheetTitle>
           <SheetDescription>
@@ -91,7 +91,7 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
 
         <div className="flex flex-col gap-4">
           {FIELDS.map((f) => (
-            <div key={f.key} className="flex items-center justify-between gap-4 rounded-2xl border bg-muted/50 px-4 py-3">
+            <div key={f.key} className="flex items-center justify-between gap-4 border-b py-3">
               <Label htmlFor={`rule-${f.key}`} className="text-sm font-medium">
                 {f.label}
               </Label>

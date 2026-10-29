@@ -11,9 +11,11 @@ const DEFAULT_COUNT = 90
 const MIN_COUNT = 20
 const MAX_COUNT = 400
 
-const segCls = 'gap-0.5 rounded-full bg-muted p-[3px]'
+const segCls = 'gap-0.5 bg-transparent p-0'
 const segItemCls =
-  'h-8 min-w-0 gap-1.5 rounded-full px-2.5 text-xs sm:px-4 sm:text-[13px] font-semibold text-muted-foreground hover:bg-transparent hover:text-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary'
+  'h-7 min-w-0 gap-1.5 rounded-md px-2.5 text-xs font-bold text-muted-foreground hover:bg-muted hover:text-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary'
+const typeItemCls =
+  'h-7 min-w-0 gap-1.5 rounded-md px-2.5 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground aria-pressed:bg-muted aria-pressed:text-foreground aria-pressed:hover:bg-muted'
 
 function fmtTime(t: number, tf: Timeframe, span: number) {
   const d = new Date(t * 1000)
@@ -271,15 +273,15 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
   const hits = vflags.filter(Boolean).length
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-2">
+    <div className="flex flex-col">
+      <div className="flex items-center justify-between gap-2 border-b px-4 py-2 lg:px-6">
         {mobile ? (
-          <label className="relative flex h-8 items-center rounded-full bg-primary text-primary-foreground">
+          <label className="relative flex h-8 items-center rounded-md bg-muted text-foreground">
             <select
               value={tf}
               onChange={(e) => onChange({ tf: e.target.value as Timeframe })}
               aria-label="Timeframe"
-              className="h-full appearance-none rounded-full bg-transparent pr-8 pl-4 text-[13px] font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-full appearance-none rounded-md bg-transparent pr-8 pl-3 text-[13px] font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               {timeframes.map((t) => (
                 <option key={t} value={t} className="bg-popover text-popover-foreground">
@@ -302,15 +304,15 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
         <div className="flex items-center gap-4">
           {hits > 0 && (
             <span className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-              <span className="size-2.5 rounded-[3px] bg-amber ring-1 ring-amber-strong/40" />
+              <span className="size-2.5 rounded-[2px] bg-amber ring-1 ring-amber-strong/40" />
               {hits} lonjakan
             </span>
           )}
           <ToggleGroup spacing={0} className={segCls} value={[type]} onValueChange={(v) => v[0] && onChange({ type: v[0] as ChartType })} aria-label="Tipe chart">
-            <ToggleGroupItem value="candle" className={segItemCls} aria-label="Candle">
+            <ToggleGroupItem value="candle" className={typeItemCls} aria-label="Candle">
               <ChartCandlestickIcon className="size-3.5" />
             </ToggleGroupItem>
-            <ToggleGroupItem value="line" className={segItemCls} aria-label="Line">
+            <ToggleGroupItem value="line" className={typeItemCls} aria-label="Line">
               <ChartLineIcon className="size-3.5" />
             </ToggleGroupItem>
           </ToggleGroup>
@@ -319,7 +321,7 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
 
       <div
         ref={boxRef}
-        className="relative h-[320px] cursor-grab touch-pan-y select-none active:cursor-grabbing md:h-[420px]"
+        className="relative h-[300px] cursor-grab touch-pan-y select-none px-2 active:cursor-grabbing md:h-[400px] lg:h-[min(460px,calc(100dvh-420px))] lg:min-h-[300px] lg:px-4"
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}

@@ -41,9 +41,9 @@
 
 /* Web3: gelap ala Jupiter dengan aksen lime; amber khusus untuk lonjakan */
 :root {
-    --background: #f3f5f9;
+    --background: #f7f8fa;
     --foreground: #0e1320;
-    --card: #ffffff;
+    --card: #f7f8fa;
     --card-foreground: #0e1320;
     --popover: #ffffff;
     --popover-foreground: #0e1320;
@@ -56,10 +56,10 @@
     --accent: #0f172a0d;
     --accent-foreground: #0e1320;
     --destructive: #e5484d;
-    --border: #0f172a14;
+    --border: #0f172a1a;
     --input: #0f172a1f;
     --ring: #16a34a;
-    --radius: 0.875rem;
+    --radius: 0.625rem;
     --up: #16a34a;
     --down: #e5484d;
     --amber: rgba(255, 176, 32, 0.22);
@@ -72,7 +72,7 @@
 .dark {
     --background: #07090d;
     --foreground: #eef1f6;
-    --card: #0f141c;
+    --card: #07090d;
     --card-foreground: #eef1f6;
     --popover: #121824;
     --popover-foreground: #eef1f6;
@@ -107,9 +107,6 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    background-image: radial-gradient(800px 560px at -5% -8%, var(--glow-a), transparent 70%), radial-gradient(800px 520px at 100% -10%, var(--glow-b), transparent 70%);
-    background-repeat: no-repeat;
-    background-attachment: fixed;
     font-feature-settings: 'tnum' 0;
     font-size: 14px;
     line-height: 1.5;

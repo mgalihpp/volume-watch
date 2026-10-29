@@ -15,13 +15,13 @@ export function AlertMenu({ alerts }: { alerts: AlertEntry[] }) {
 
   return (
     <Popover.Root>
-      <Popover.Trigger render={<Button variant="outline" size="icon-lg" className="relative rounded-full" aria-label={`Riwayat alert${unseen ? `, ${unseen} baru` : ''}`} />}>
+      <Popover.Trigger render={<Button variant="ghost" size="icon-lg" className="relative rounded-lg text-muted-foreground" aria-label={`Riwayat alert${unseen ? `, ${unseen} baru` : ''}`} />}>
         <BellIcon />
-        {unseen > 0 && <span className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-amber-strong ring-2 ring-background" />}
+        {unseen > 0 && <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-amber-strong" />}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={10} className="z-50">
-          <Popover.Popup className="w-[min(420px,calc(100vw-2rem))] origin-top-right rounded-3xl border bg-popover p-2 text-popover-foreground shadow-2xl outline-none transition duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
+          <Popover.Popup className="w-[min(420px,calc(100vw-2rem))] origin-top-right rounded-xl border bg-popover p-2 text-popover-foreground shadow-2xl outline-none transition duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
             <div className="flex items-center justify-between px-3 pt-3 pb-2">
               <span className="text-[15px] font-bold">Alert</span>
               {unseen > 0 && (
@@ -42,7 +42,7 @@ export function AlertMenu({ alerts }: { alerts: AlertEntry[] }) {
             <Popover.Close
               render={<a href="#/alerts" />}
               onClick={markSeen}
-              className="mt-1 flex items-center justify-center gap-1.5 rounded-2xl px-3 py-3 text-[13px] font-bold text-up hover:bg-muted"
+              className="mt-1 flex items-center justify-center gap-1.5 rounded-lg px-3 py-3 text-[13px] font-bold text-up hover:bg-muted"
             >
               Lihat semua alert
               <ArrowRightIcon className="size-3.5" />

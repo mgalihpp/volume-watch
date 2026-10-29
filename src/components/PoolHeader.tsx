@@ -32,40 +32,42 @@ export function PoolHeader({ addr, pools, rows, rule, candles, tf }: Props) {
   const vol1m = row?.vol1m ?? null
 
   return (
-    <div className="flex flex-col gap-4 rounded-3xl border bg-card p-5 sm:gap-5 sm:p-7">
-      <div className="flex flex-col gap-3">
-        <span className="flex min-w-0 items-center gap-3">
-          <TokenPair x={pool.x} y={pool.y} size="lg" />
-          <span className="truncate text-xl font-bold sm:text-[26px]">{pair}</span>
-          <span className="shrink-0 rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">{bin}</span>
+    <div className="flex flex-col border-b lg:flex-row lg:items-center lg:gap-8 lg:px-6 lg:py-4">
+      <div className="flex min-w-0 flex-col gap-1.5 px-4 pt-4 pb-3.5 lg:gap-2 lg:p-0">
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span className="hidden lg:block">
+            <TokenPair x={pool.x} y={pool.y} size="lg" />
+          </span>
+          <span className="truncate text-base font-bold lg:text-xl">{pair}</span>
+          <span className="shrink-0 text-xs font-medium text-muted-foreground">{bin}</span>
           {row?.isSpike && (
-            <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-amber-strong/15 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-strong uppercase">
+            <span className="flex shrink-0 items-center gap-1.5 rounded-[4px] bg-amber-strong/15 px-2 py-0.5 text-[9px] font-bold tracking-wider text-amber-strong uppercase lg:text-[10px]">
               <span className="size-1.5 animate-pulse rounded-full bg-amber-strong" />
               Lonjakan
             </span>
           )}
         </span>
-        <span className="flex flex-wrap items-center gap-x-4 gap-y-2 tabular-nums">
-          <span className="text-4xl leading-none font-bold tracking-tighter sm:text-[52px]">{price ? <Price value={price} /> : '–'}</span>
+        <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1 tabular-nums">
+          <span className="text-[34px] leading-none font-bold tracking-tighter lg:text-[32px]">{price ? <Price value={price} /> : '–'}</span>
           {chg != null && (
-            <span className={cn('flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold whitespace-nowrap', chg >= 0 ? 'bg-up/10 text-up' : 'bg-down/10 text-down')}>
+            <span className={cn('text-[13px] font-semibold whitespace-nowrap', chg >= 0 ? 'text-up' : 'text-down')}>
               {chg >= 0 ? '+' : ''}
-              {chg.toFixed(2)}%<span className="font-normal opacity-70">{spanLabel(Math.min(span, 86400))}</span>
+              {chg.toFixed(2)}%<span className="ml-1.5 font-normal text-muted-foreground">{spanLabel(Math.min(span, 86400))}</span>
             </span>
           )}
         </span>
       </div>
 
-      <dl className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-        <Stat label="Volume 1 menit" value={vol1m == null ? '–' : usdShort(vol1m)} goal={`batas ${usdShort(rule.minUsd)}`} progress={vol1m == null ? null : vol1m / rule.minUsd} hot={row?.isSpike} />
+      <dl className="grid grid-cols-3 divide-x border-t lg:flex lg:divide-x-0 lg:border-t-0">
+        <Stat label="Volume 1m" value={vol1m == null ? '–' : usdShort(vol1m)} goal={`batas ${usdShort(rule.minUsd)}`} progress={vol1m == null ? null : vol1m / rule.minUsd} hot={row?.isSpike} />
         <Stat
-          label="Dibanding normal"
+          label="Vs normal"
           value={ratio == null ? '–' : Number.isFinite(ratio) ? `${ratio.toFixed(1)}×` : 'dari nol'}
           goal={`batas ${rule.mult}×`}
           progress={ratio == null ? null : ratio / rule.mult}
           hot={row?.isSpike}
         />
-        <Stat label="TVL" value={row ? usdShort(row.tvl) : '–'} className="hidden md:flex" />
+        <Stat label="TVL" value={row ? usdShort(row.tvl) : '–'} />
       </dl>
     </div>
   )
@@ -77,19 +79,18 @@ interface StatProps {
   goal?: string
   progress?: number | null
   hot?: boolean
-  className?: string
 }
 
-function Stat({ label, value, goal, progress, hot, className }: StatProps) {
+function Stat({ label, value, goal, progress, hot }: StatProps) {
   return (
-    <div className={cn('flex min-w-0 flex-col gap-2.5 rounded-2xl bg-muted p-3.5 sm:p-[18px]', className)}>
-      <dt className="truncate text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">{label}</dt>
-      <dd className={cn('truncate text-xl leading-none font-bold tabular-nums sm:text-2xl', hot && 'text-amber-strong')}>{value}</dd>
+    <div className="flex min-w-0 flex-col gap-1.5 px-4 py-3 lg:w-[150px] lg:border-l lg:px-6 lg:py-0">
+      <dt className="truncate text-[9px] font-semibold tracking-[0.12em] text-muted-foreground uppercase lg:text-[10px]">{label}</dt>
+      <dd className={cn('truncate text-[17px] leading-none font-bold tabular-nums lg:text-xl', hot && 'text-amber-strong')}>{value}</dd>
       {goal && (
-        <>
+        <div className="hidden flex-col gap-1 lg:flex">
           <Meter value={progress == null ? null : Math.min(progress, 1)} hot={hot} className="bg-foreground/10" />
           <span className="text-[11px] text-muted-foreground tabular-nums">{goal}</span>
-        </>
+        </div>
       )}
     </div>
   )

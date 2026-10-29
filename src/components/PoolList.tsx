@@ -12,9 +12,10 @@ interface Props {
   onPick: (addr: string) => void
 }
 
+/** Sidebar desktop: baris datar dipisah garis, yang dipilih ditandai bar di tepi kiri. */
 export function PoolList({ pools, rows, rule, picked, onPick }: Props & { rule: Rule }) {
   return (
-    <div role="tablist" aria-label="Pool" className="flex flex-col gap-3">
+    <div role="tablist" aria-label="Pool" className="flex flex-col">
       {Object.entries(pools).map(([addr, pool]) => {
         const r = rows[addr]
         const on = picked === addr
@@ -27,18 +28,19 @@ export function PoolList({ pools, rows, rule, picked, onPick }: Props & { rule: 
             aria-selected={on}
             onClick={() => onPick(addr)}
             className={cn(
-              'flex min-w-0 flex-col gap-3 rounded-[20px] border p-4 text-left transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/40',
-              on ? 'border-up/50 bg-up/[0.06]' : 'bg-card hover:border-foreground/20',
+              'relative flex min-w-0 flex-col gap-2.5 border-b px-4 py-3.5 text-left outline-none transition-colors focus-visible:bg-muted',
+              on ? 'bg-up/[0.06]' : 'hover:bg-muted/60',
             )}
           >
+            {on && <span className="absolute inset-y-0 left-0 w-[3px] bg-up" />}
             <span className="flex items-center gap-2.5">
               <TokenPair x={pool.x} y={pool.y} />
-              <span className="truncate font-bold">{pair}</span>
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{bin}</span>
+              <span className="truncate text-sm font-bold">{pair}</span>
+              <span className="text-[11px] font-medium text-muted-foreground">{bin}</span>
               {r?.isSpike && <span className="ml-auto size-2 shrink-0 animate-pulse rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
             </span>
             <span className="flex items-baseline justify-between gap-2 tabular-nums">
-              <span className="text-[17px] font-semibold">{r ? <Price value={r.price} /> : '–'}</span>
+              <span className="text-[15px] font-semibold">{r ? <Price value={r.price} /> : '–'}</span>
               <span className="truncate text-xs text-muted-foreground">{r?.vol1m == null ? 'menghitung…' : `${usdShort(r.vol1m)}/mnt`}</span>
             </span>
             <Meter value={spikeProgress(r, rule)} hot={r?.isSpike} />
@@ -49,12 +51,13 @@ export function PoolList({ pools, rows, rule, picked, onPick }: Props & { rule: 
   )
 }
 
-/** Versi layar kecil: chip horizontal yang bisa digeser. */
-export function PoolChips({ pools, rows, picked, onPick }: Props) {
+/** Layar kecil: tab teks dengan garis bawah, bisa digeser. */
+export function PoolTabs({ pools, rows, picked, onPick }: Props) {
   return (
-    <div role="tablist" aria-label="Pool" className="flex shrink-0 gap-2">
+    <div role="tablist" aria-label="Pool" className="flex w-max min-w-full">
       {Object.entries(pools).map(([addr, pool]) => {
         const on = picked === addr
+        const { pair, bin } = splitName(pool.name)
         return (
           <button
             key={addr}
@@ -62,10 +65,13 @@ export function PoolChips({ pools, rows, picked, onPick }: Props) {
             role="tab"
             aria-selected={on}
             onClick={() => onPick(addr)}
-            className={cn('flex h-9 shrink-0 items-center gap-2 rounded-full border pr-3.5 pl-2 text-[13px] font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/40', on ? 'border-up/50 bg-up/10' : 'bg-card')}
+            className={cn(
+              'flex shrink-0 items-center gap-1.5 border-b-2 px-4 py-3 text-[13px] whitespace-nowrap outline-none focus-visible:bg-muted',
+              on ? 'border-up font-bold text-foreground' : 'border-transparent font-medium text-muted-foreground',
+            )}
           >
-            <TokenPair x={pool.x} y={pool.y} />
-            {splitName(pool.name).pair}
+            {pair}
+            <span className="text-[11px] font-normal text-muted-foreground">{bin.replace('bin ', '')}</span>
             {rows[addr]?.isSpike && <span className="size-1.5 rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
           </button>
         )

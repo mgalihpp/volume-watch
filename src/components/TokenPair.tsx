@@ -13,7 +13,7 @@ function Token({ token, className, style }: { token: TokenInfo; className?: stri
   const [failed, setFailed] = useState(false)
   const src = token.icon || ICONS[token.symbol]
   return (
-    <span style={style} className={cn('absolute top-0 flex items-center justify-center overflow-hidden rounded-full bg-muted font-semibold ring-2 ring-[var(--card)]', className)}>
+    <span style={style} className={cn('absolute top-0 flex items-center justify-center overflow-hidden rounded-full bg-muted font-semibold ring-2 ring-[var(--background)]', className)}>
       {src && !failed ? <img src={src} alt="" className="size-full max-w-none object-cover" onError={() => setFailed(true)} /> : token.symbol[0]}
     </span>
   )
