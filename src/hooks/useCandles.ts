@@ -26,7 +26,7 @@ export function useCandles(addr: string, tf: Timeframe) {
         .then((c) => !cancelled && (setCandles((prev) => merge(prev, c)), setError('')))
         .catch((e: Error) => !cancelled && setError(`Chart gagal dimuat (${e.message}). Dicoba lagi dalam 30 detik.`))
     void load()
-    const id = setInterval(load, tf === '1m' ? 60000 : 30000)
+    const id = setInterval(load, tf === '1m' ? 15000 : 30000)
     return () => {
       cancelled = true
       clearInterval(id)
