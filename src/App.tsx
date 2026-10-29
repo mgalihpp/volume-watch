@@ -26,7 +26,8 @@ export default function App() {
     tf: saved.tf in TF_SEC ? saved.tf : DEFAULT_CHART.tf,
     type: saved.type === 'line' ? 'line' : 'candle',
   } as const
-  const { rows, status, alerts } = usePoolMonitor(rule)
+  const { rows: localRows, status, alerts } = usePoolMonitor(rule)
+  const rows = bot && Object.keys(bot.rows).length ? bot.rows : localRows
   const { candles, error, loadOlder, loadingOlder } = useCandles(chart.addr, chart.tf)
   const flags = useMemo(() => spikeFlags(candles, chart.tf, rule), [candles, chart.tf, rule])
   const oldest = candles[0]?.timestamp

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { AlertEntry } from '@/hooks/usePoolMonitor'
+import type { AlertEntry, PoolRow } from '@/hooks/usePoolMonitor'
 import type { Rule } from '@/lib/meteora'
 
 interface RawBotAlert {
@@ -9,10 +9,22 @@ interface RawBotAlert {
   ratio: number | null
 }
 
+interface RawBotPool {
+  perMin: number
+  base: number
+  ratio: number | null
+  spike: boolean
+  price: number
+  tvl: number
+  chg: number
+}
+
 export interface BotData {
   rule: Rule
   alerts: AlertEntry[]
   updated: number
+  /** Angka live bot per pool (candle 5m berjalan), sama persis dengan yang memicu Telegram */
+  rows: Record<string, PoolRow>
 }
 
 function alertTime(t: number) {
@@ -30,7 +42,7 @@ export function useBotData() {
     const load = () =>
       fetch('./data/alerts.json', { cache: 'no-store' })
         .then((r) => (r.ok ? r.json() : null))
-        .then((j: { rule: Rule; alerts: RawBotAlert[]; updated: number } | null) => {
+        .then((j: { rule: Rule; alerts: RawBotAlert[]; updated: number; pools?: Record<string, RawBotPool> } | null) => {
           if (cancelled || !j?.rule) return
           const alerts = j.alerts
             .map((a, i) => ({
@@ -41,11 +53,15 @@ export function useBotData() {
               ratio: a.ratio == null ? 'jauh di atas normal' : `${a.ratio.toFixed(1)}× normal`,
             }))
             .reverse()
-          setData({ rule: j.rule, alerts, updated: j.updated })
+          const rows: Record<string, PoolRow> = {}
+          for (const [addr, p] of Object.entries(j.pools ?? {})) {
+            rows[addr] = { vol1m: p.perMin, ratio: p.ratio ?? Infinity, base: p.base, chg: p.chg, price: p.price, vol30: 0, tvl: p.tvl, isSpike: p.spike, series: [] }
+          }
+          setData({ rule: j.rule, alerts, updated: j.updated, rows })
         })
         .catch(() => {})
     void load()
-    const id = setInterval(load, 30000)
+    const id = setInterval(load, 5000)
     return () => {
       cancelled = true
       clearInterval(id)
