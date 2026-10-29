@@ -4,6 +4,7 @@ import { PoolHeader } from '@/components/PoolHeader'
 import { PoolList } from '@/components/PoolList'
 import { PriceChart, type ChartType } from '@/components/PriceChart'
 import { RuleSheet } from '@/components/RuleSheet'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import { useCandles } from '@/hooks/useCandles'
 import { useDark } from '@/hooks/useDark'
 import { usePoolMonitor } from '@/hooks/usePoolMonitor'
@@ -14,7 +15,7 @@ import { cn } from '@/lib/utils'
 const DEFAULT_CHART = { addr: POOL_ADDRESSES[2], tf: '1h' as Timeframe, type: 'candle' as ChartType }
 
 export default function App() {
-  const dark = useDark()
+  const { dark, setMode } = useDark()
   const [rule, setRule] = useStored<Rule>('rule', DEFAULT_RULE)
   const [saved, setChart] = useStored('chart', DEFAULT_CHART)
   const chart = {
@@ -46,6 +47,7 @@ export default function App() {
               {status.ok ? `Live, cek tiap ${rule.interval} detik` : status.text.startsWith('Memuat') ? 'Menghubungkan…' : 'Terputus'}
             </span>
           </span>
+          <ThemeToggle dark={dark} setMode={setMode} />
           <AlertMenu alerts={alerts} />
           <RuleSheet rule={rule} onSave={setRule} />
         </div>

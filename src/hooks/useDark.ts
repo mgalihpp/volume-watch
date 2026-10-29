@@ -1,18 +1,24 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
+import { useStored } from '@/hooks/useStored'
+
+export type ThemeMode = 'system' | 'light' | 'dark'
 
 const query = () => window.matchMedia('(prefers-color-scheme: dark)')
 
-/** Ikuti tema sistem dan pasang class .dark di <html> supaya varian dark: shadcn ikut berlaku. */
+/** Tema pilihan pengguna (atau ikut sistem); pasang class .dark di <html> supaya varian dark: shadcn ikut berlaku. */
 export function useDark() {
-  const [dark, setDark] = useState(() => query().matches)
+  const [{ mode }, setStored] = useStored<{ mode: ThemeMode }>('theme', { mode: 'system' })
+  const [systemDark, setSystemDark] = useState(() => query().matches)
   useEffect(() => {
     const mq = query()
-    const on = () => setDark(mq.matches)
+    const on = () => setSystemDark(mq.matches)
     mq.addEventListener('change', on)
     return () => mq.removeEventListener('change', on)
   }, [])
-  useEffect(() => {
+  const dark = mode === 'system' ? systemDark : mode === 'dark'
+  // layout effect: class harus sudah terpasang sebelum chart membaca warna di effect biasa
+  useLayoutEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
   }, [dark])
-  return dark
+  return { dark, mode, setMode: (m: ThemeMode) => setStored({ mode: m }) }
 }
