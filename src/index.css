@@ -39,31 +39,58 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Paper-and-ink palette: a strip-chart recorder, not a SaaS dashboard */
+/* Netral dingin, satu warna sinyal (amber) khusus untuk lonjakan */
 :root {
-    --background: #fafafa;
-    --foreground: #18181b;
+    --background: #f4f5f7;
+    --foreground: #14161a;
     --card: #ffffff;
-    --card-foreground: #18181b;
+    --card-foreground: #14161a;
     --popover: #ffffff;
-    --popover-foreground: #18181b;
-    --primary: #18181b;
-    --primary-foreground: #fafafa;
-    --secondary: #f4f4f5;
-    --secondary-foreground: #18181b;
-    --muted: #f4f4f5;
-    --muted-foreground: #71717a;
-    --accent: #f4f4f5;
-    --accent-foreground: #18181b;
+    --popover-foreground: #14161a;
+    --primary: #14161a;
+    --primary-foreground: #ffffff;
+    --secondary: #eceef1;
+    --secondary-foreground: #14161a;
+    --muted: #eceef1;
+    --muted-foreground: #6b717c;
+    --accent: #eceef1;
+    --accent-foreground: #14161a;
     --destructive: #dc2626;
-    --border: #e4e4e7;
-    --input: #e4e4e7;
-    --ring: #a1a1aa;
-    --radius: 0.625rem;
-    --up: #16a34a;
-    --down: #dc2626;
-    --amber: #fef3c7;
-    --amber-strong: #d97706;
+    --border: #e3e5e9;
+    --input: #dcdfe4;
+    --ring: #9aa1ac;
+    --radius: 0.75rem;
+    --up: #12a150;
+    --down: #e0352b;
+    --amber: #fdf0d2;
+    --amber-strong: #e08a00;
+    --grid: #eef0f3;
+}
+
+.dark {
+    --background: #0e1013;
+    --foreground: #e9ebee;
+    --card: #15181c;
+    --card-foreground: #e9ebee;
+    --popover: #15181c;
+    --popover-foreground: #e9ebee;
+    --primary: #e9ebee;
+    --primary-foreground: #0e1013;
+    --secondary: #1d2126;
+    --secondary-foreground: #e9ebee;
+    --muted: #1d2126;
+    --muted-foreground: #8a919c;
+    --accent: #1d2126;
+    --accent-foreground: #e9ebee;
+    --destructive: #f0544a;
+    --border: #252a30;
+    --input: #2c3138;
+    --ring: #5b636e;
+    --up: #2fbf6b;
+    --down: #f0544a;
+    --amber: rgba(240, 160, 30, 0.16);
+    --amber-strong: #f2a516;
+    --grid: #1c2025;
 }
 
 @layer base {

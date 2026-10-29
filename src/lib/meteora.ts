@@ -64,9 +64,9 @@ export async function fetchPools(): Promise<Snapshot[]> {
   return out
 }
 
-export async function fetchCandles(address: string, tf: Timeframe): Promise<Candle[]> {
-  const end = Math.floor(Date.now() / 1000)
-  const start = end - TF_SEC[tf] * 90
+export async function fetchCandles(address: string, tf: Timeframe, end = Math.floor(Date.now() / 1000), count = 96): Promise<Candle[]> {
+  // API menolak rentang 100 candle atau lebih per request
+  const start = end - TF_SEC[tf] * count
   const j = await getJSON<{ data?: Candle[] }>(`${API}/pools/${address}/ohlcv?timeframe=${tf}&start_time=${start}&end_time=${end}`)
   return (j.data ?? []).filter((c) => c.open > 0)
 }
@@ -79,7 +79,22 @@ export function median(values: number[]): number {
 }
 
 export const usd = (n: number) => '$' + Math.round(n).toLocaleString('en-US')
-export const fmtPrice = (p: number) => (p >= 1 ? p.toFixed(4) : p.toPrecision(4))
+export const usdShort = (n: number) =>
+  n >= 1e6 ? `$${(n / 1e6).toFixed(2)}M` : n >= 1e4 ? `$${(n / 1e3).toFixed(0)}k` : n >= 1e3 ? `$${(n / 1e3).toFixed(1)}k` : `$${Math.round(n)}`
+
+/** Harga kecil ditulis 0.0₇5028 (tujuh nol disingkat), bukan 5.028e-8. */
+export function priceParts(p: number): { head: string; zeros: number; digits: string } {
+  if (!(p > 0) || p >= 0.0001) return { head: p >= 1 ? p.toFixed(4) : p.toPrecision(4), zeros: 0, digits: '' }
+  const zeros = Math.floor(-Math.log10(p))
+  const digits = Math.round(p * 10 ** (zeros + 4)).toString().slice(0, 4)
+  return { head: '0.0', zeros, digits }
+}
+
+const SUB = '₀₁₂₃₄₅₆₇₈₉'
+export function fmtPrice(p: number) {
+  const { head, zeros, digits } = priceParts(p)
+  return zeros ? head + [...String(zeros)].map((d) => SUB[+d]).join('') + digits : head
+}
 
 export interface Rule {
   mult: number

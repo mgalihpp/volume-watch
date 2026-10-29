@@ -43,9 +43,9 @@ export function RuleSheet({ rule, onSave }: { rule: Rule; onSave: (rule: Rule) =
         setOpen(o)
       }}
     >
-      <SheetTrigger render={<Button variant="outline" />}>
+      <SheetTrigger render={<Button variant="outline" aria-label="Aturan alert" />}>
         <SlidersHorizontalIcon />
-        Aturan alert
+        <span className="hidden sm:inline">Aturan alert</span>
       </SheetTrigger>
       <SheetContent className="gap-7 p-7 sm:max-w-[420px]">
         <SheetHeader className="p-0">

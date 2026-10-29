@@ -1,14 +1,20 @@
-import { PoolTabs } from '@/components/PoolTabs'
+import { useCallback, useMemo } from 'react'
+import { AlertMenu } from '@/components/AlertMenu'
+import { PoolHeader } from '@/components/PoolHeader'
+import { PoolList } from '@/components/PoolList'
 import { PriceChart, type ChartType } from '@/components/PriceChart'
 import { RuleSheet } from '@/components/RuleSheet'
+import { useCandles } from '@/hooks/useCandles'
+import { useDark } from '@/hooks/useDark'
 import { usePoolMonitor } from '@/hooks/usePoolMonitor'
 import { useStored } from '@/hooks/useStored'
-import { DEFAULT_RULE, POOL_ADDRESSES, POOLS, TF_SEC, type Rule, type Timeframe } from '@/lib/meteora'
+import { DEFAULT_RULE, POOL_ADDRESSES, POOLS, TF_SEC, spikeFlags, type Rule, type Timeframe } from '@/lib/meteora'
 import { cn } from '@/lib/utils'
 
 const DEFAULT_CHART = { addr: POOL_ADDRESSES[2], tf: '1h' as Timeframe, type: 'candle' as ChartType }
 
 export default function App() {
+  const dark = useDark()
   const [rule, setRule] = useStored<Rule>('rule', DEFAULT_RULE)
   const [saved, setChart] = useStored('chart', DEFAULT_CHART)
   const chart = {
@@ -17,43 +23,54 @@ export default function App() {
     type: saved.type === 'line' ? 'line' : 'candle',
   } as const
   const { rows, status, alerts } = usePoolMonitor(rule)
+  const { candles, error, loadOlder, loadingOlder } = useCandles(chart.addr, chart.tf)
+  const flags = useMemo(() => spikeFlags(candles, chart.tf, rule), [candles, chart.tf, rule])
+  const oldest = candles[0]?.timestamp
+  const needOlder = useCallback(() => loadOlder(oldest), [loadOlder, oldest])
+  const pick = (addr: string) => setChart({ addr })
 
   return (
-    <div className="mx-auto flex max-w-[1080px] flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="mx-auto flex max-w-[1240px] flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
       <header className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold tracking-tight">Volume Watch</h1>
-          <span title={status.text} className="flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
-            <span className={cn('size-1.5 rounded-full', status.ok ? 'bg-up' : 'bg-down')} />
-            {status.ok ? 'Live' : 'Terputus'}
-          </span>
+        <div className="flex items-center gap-2.5">
+          <Logo />
+          <h1 className="text-[15px] font-semibold tracking-tight">Volume Watch</h1>
         </div>
-        <RuleSheet rule={rule} onSave={setRule} />
+        <div className="flex items-center gap-2">
+          <span title={status.text} className="flex items-center gap-2 px-2 text-xs text-muted-foreground">
+            <span className={cn('relative flex size-2', status.ok ? 'text-up' : 'text-down')}>
+              {status.ok && <span className="absolute inset-0 animate-ping rounded-full bg-current opacity-40" />}
+              <span className="relative size-2 rounded-full bg-current" />
+            </span>
+            <span className="hidden md:inline">
+              {status.ok ? `Live, cek tiap ${rule.interval} detik` : status.text.startsWith('Memuat') ? 'Menghubungkan…' : 'Terputus'}
+            </span>
+          </span>
+          <AlertMenu alerts={alerts} />
+          <RuleSheet rule={rule} onSave={setRule} />
+        </div>
       </header>
 
-      <PoolTabs rows={rows} picked={chart.addr} onPick={(addr) => setChart({ addr })} />
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[264px_minmax(0,1fr)] lg:gap-8">
+        <aside className="hidden min-w-0 md:block lg:sticky lg:top-7 lg:self-start">
+          <PoolList rows={rows} rule={rule} picked={chart.addr} onPick={pick} />
+        </aside>
 
-      <PriceChart {...chart} rule={rule} onChange={setChart} />
-
-      <section aria-labelledby="h-alert" className="flex flex-col">
-        <h2 id="h-alert" className="mb-1 text-sm font-semibold">Alert</h2>
-        {alerts.length === 0 ? (
-          <p className="border-b py-3 text-muted-foreground">Belum ada lonjakan.</p>
-        ) : (
-          <ul>
-            {alerts.map((a) => (
-              <li key={a.id} className="flex items-center justify-between gap-4 border-b py-3">
-                <span className="flex min-w-0 items-center gap-2.5">
-                  <span className="size-1.5 shrink-0 rounded-full bg-amber-strong" />
-                  <span className="font-medium">{a.pool}</span>
-                  <span className="truncate text-muted-foreground">{a.text}</span>
-                </span>
-                <span className="shrink-0 text-muted-foreground tabular-nums">{a.time}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <main className="flex min-w-0 flex-col gap-6 rounded-2xl border bg-card p-4 sm:p-5 md:p-7">
+          <PoolHeader addr={chart.addr} rows={rows} rule={rule} candles={candles} tf={chart.tf} onPick={pick} />
+          <PriceChart {...chart} candles={candles} flags={flags} error={error} dark={dark} loadingOlder={loadingOlder} onNeedOlder={needOlder} onChange={setChart} />
+        </main>
+      </div>
     </div>
+  )
+}
+
+function Logo() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
+      <rect width="24" height="24" rx="7" className="fill-foreground" />
+      <path d="M6 15h2v3H6zM10 11h2v7h-2zM14 6h2v12h-2z" className="fill-background" />
+      <path d="M18 9h1.5v9H18z" className="fill-amber-strong" />
+    </svg>
   )
 }

@@ -17,7 +17,8 @@ export interface AlertEntry {
   id: number
   time: string
   pool: string
-  text: string
+  vol: number
+  ratio: string
 }
 
 interface Track {
@@ -100,13 +101,12 @@ export function usePoolMonitor(rule: Rule) {
 
         if (isSpike && now - t.lastAlert >= COOLDOWN_MS) {
           t.lastAlert = now
-          const arah = chg > 0 ? 'naik' : chg < 0 ? 'turun' : 'datar'
-          const kali = Number.isFinite(ratio) ? `${ratio.toFixed(1)} kali` : 'jauh di atas'
           fresh.push({
             id: ++alertId.current,
-            time: new Date().toLocaleTimeString('id-ID'),
+            time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
             pool: POOLS[s.address],
-            text: `${usd(vol1m)} dalam 1 menit, ${kali} normal. Harga ${arah} ${Math.abs(chg).toFixed(2)}%.`,
+            vol: vol1m,
+            ratio: Number.isFinite(ratio) ? `${ratio.toFixed(1)}× normal` : 'jauh di atas normal',
           })
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification(`Lonjakan volume ${POOLS[s.address]}`, { body: `${usd(vol1m)} dalam 1 menit` })
@@ -122,9 +122,11 @@ export function usePoolMonitor(rule: Rule) {
     }
 
     void tick()
+    const warm = setTimeout(tick, 15000) // angka pertama tidak perlu menunggu satu interval penuh
     const id = setInterval(tick, rule.interval * 1000)
     return () => {
       cancelled = true
+      clearTimeout(warm)
       clearInterval(id)
     }
   }, [rule.interval])
