@@ -10,7 +10,7 @@ import type { Rule } from '@/lib/meteora'
 
 const FIELDS: { key: keyof Rule; label: string; unit: string; min: number; step: number }[] = [
   { key: 'mult', label: 'Lonjakan', unit: 'x', min: 1, step: 0.5 },
-  { key: 'baseline', label: 'Baseline', unit: 'candle', min: 1, step: 1 },
+  { key: 'baseline', label: 'Baseline', unit: 'menit', min: 1, step: 1 },
   { key: 'minUsd', label: 'Minimal volume', unit: 'USD', min: 0, step: 100 },
   { key: 'interval', label: 'Cek tiap', unit: 'detik', min: 10, step: 5 },
 ]
@@ -82,7 +82,7 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
           <SheetTitle className="text-lg font-semibold">Aturan alert</SheetTitle>
           <SheetDescription>
             {bot
-              ? 'Berlaku untuk website dan bot Telegram. Dicek pada candle 5 menit, sama dengan pita kuning di chart 5m.'
+              ? 'Berlaku untuk website dan bot Telegram. Volume dihitung per 1 menit dari data Meteora, dibanding median beberapa menit sebelumnya.'
               : 'Alert dikirim saat volume 1 menit melewati semua batas ini.'}
           </SheetDescription>
         </SheetHeader>

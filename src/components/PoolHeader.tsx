@@ -54,7 +54,7 @@ export function PoolHeader({ addr, rows, rule, candles, tf, onPick }: Props) {
       </div>
 
       <dl className="grid grid-cols-2 gap-x-5 gap-y-5 rounded-xl bg-muted/50 p-4 md:grid-cols-3 md:gap-x-10 md:px-5">
-        <Stat label="Volume per menit" value={vol1m == null ? '–' : usdShort(vol1m)} goal={`batas ${usdShort(rule.minUsd)}`} progress={vol1m == null ? null : vol1m / rule.minUsd} hot={row?.isSpike} />
+        <Stat label="Volume 1 menit" value={vol1m == null ? '–' : usdShort(vol1m)} goal={`batas ${usdShort(rule.minUsd)}`} progress={vol1m == null ? null : vol1m / rule.minUsd} hot={row?.isSpike} />
         <Stat
           label="Dibanding normal"
           value={ratio == null ? '–' : Number.isFinite(ratio) ? `${ratio.toFixed(1)}×` : 'dari nol'}
