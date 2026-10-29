@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { ChartCandlestickIcon, ChartLineIcon, ChevronsRightIcon, LoaderCircleIcon } from 'lucide-react'
+import { ChartCandlestickIcon, ChartLineIcon, ChevronDownIcon, ChevronsRightIcon, LoaderCircleIcon } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { useMobile } from '@/hooks/useMobile'
 import { TF_SEC, fmtPrice, usdShort, type Candle, type Timeframe } from '@/lib/meteora'
 
 export type ChartType = 'candle' | 'line'
@@ -43,6 +44,7 @@ interface Props {
 }
 
 export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, error, dark, loadingOlder, onNeedOlder, onChange }: Props) {
+  const mobile = useMobile()
   const [hover, setHover] = useState(-1)
   const [now, setNow] = useState(() => Date.now())
   const [size, setSize] = useState({ w: 0, h: 0 })
@@ -271,13 +273,31 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-2">
-        <ToggleGroup spacing={0} className={segCls} value={[tf]} onValueChange={(v) => v[0] && onChange({ tf: v[0] as Timeframe })} aria-label="Timeframe">
+        {mobile ? (
+          <label className="relative flex h-8 items-center rounded-full bg-primary text-primary-foreground">
+            <select
+              value={tf}
+              onChange={(e) => onChange({ tf: e.target.value as Timeframe })}
+              aria-label="Timeframe"
+              className="h-full appearance-none rounded-full bg-transparent pr-8 pl-4 text-[13px] font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              {timeframes.map((t) => (
+                <option key={t} value={t} className="bg-popover text-popover-foreground">
+                  {t}
+                </option>
+              ))}
+            </select>
+            <ChevronDownIcon className="pointer-events-none absolute right-2.5 size-3.5" />
+          </label>
+        ) : (
+                  <ToggleGroup spacing={0} className={segCls} value={[tf]} onValueChange={(v) => v[0] && onChange({ tf: v[0] as Timeframe })} aria-label="Timeframe">
           {timeframes.map((t) => (
             <ToggleGroupItem key={t} value={t} className={segItemCls}>
               {t}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
+        )}
 
         <div className="flex items-center gap-4">
           {hits > 0 && (
