@@ -7,7 +7,7 @@ Dashboard untuk memantau lonjakan volume pool Meteora DLMM (DOGE-SOL dan PEPE-SO
 - Alert lonjakan volume dengan bunyi dan notifikasi browser.
 - Data dari API publik Meteora, tanpa server dan tanpa API key.
 
-Dibangun dengan Vite, React, TypeScript, Tailwind CSS, dan shadcn/ui.
+Dibangun dengan Vite, React, TypeScript, Tailwind CSS, dan shadcn/ui. Desainnya dibuat di pen.dev.
 
 ## Jalankan lokal
 

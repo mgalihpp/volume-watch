@@ -1,6 +1,6 @@
-import { PoolTable } from '@/components/PoolTable'
+import { PoolTabs } from '@/components/PoolTabs'
 import { PriceChart, type ChartType } from '@/components/PriceChart'
-import { RuleSentence } from '@/components/RuleSentence'
+import { RuleSheet } from '@/components/RuleSheet'
 import { usePoolMonitor } from '@/hooks/usePoolMonitor'
 import { useStored } from '@/hooks/useStored'
 import { DEFAULT_RULE, POOL_ADDRESSES, POOLS, TF_SEC, type Rule, type Timeframe } from '@/lib/meteora'
@@ -19,47 +19,41 @@ export default function App() {
   const { rows, status, alerts } = usePoolMonitor(rule)
 
   return (
-    <div className="mx-auto max-w-[1120px] px-4 pt-7 pb-14 md:px-6 md:pt-10 md:pb-[72px]">
-      <header>
-        <h1 className="mb-2 text-[32px] leading-[1.05] font-bold tracking-tight md:text-[40px]">Volume watch</h1>
-        <p className="text-muted-foreground">
-          <span className={cn('mr-2 inline-block size-[9px] rounded-full', status.ok ? 'bg-up' : 'bg-down')} />
-          {status.text}
-        </p>
+    <div className="mx-auto flex max-w-[1080px] flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold tracking-tight">Volume Watch</h1>
+          <span title={status.text} className="flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+            <span className={cn('size-1.5 rounded-full', status.ok ? 'bg-up' : 'bg-down')} />
+            {status.ok ? 'Live' : 'Terputus'}
+          </span>
+        </div>
+        <RuleSheet rule={rule} onSave={setRule} />
       </header>
 
-      <RuleSentence rule={rule} onChange={setRule} />
+      <PoolTabs rows={rows} picked={chart.addr} onPick={(addr) => setChart({ addr })} />
 
-      <section className="mt-12" aria-labelledby="h-chart">
-        <h2 id="h-chart" className="mb-3 text-xl font-bold tracking-tight">Harga dan volume</h2>
-        <PriceChart {...chart} rule={rule} onChange={setChart} />
+      <PriceChart {...chart} rule={rule} onChange={setChart} />
+
+      <section aria-labelledby="h-alert" className="flex flex-col">
+        <h2 id="h-alert" className="mb-1 text-sm font-semibold">Alert</h2>
+        {alerts.length === 0 ? (
+          <p className="border-b py-3 text-muted-foreground">Belum ada lonjakan.</p>
+        ) : (
+          <ul>
+            {alerts.map((a) => (
+              <li key={a.id} className="flex items-center justify-between gap-4 border-b py-3">
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <span className="size-1.5 shrink-0 rounded-full bg-amber-strong" />
+                  <span className="font-medium">{a.pool}</span>
+                  <span className="truncate text-muted-foreground">{a.text}</span>
+                </span>
+                <span className="shrink-0 text-muted-foreground tabular-nums">{a.time}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
-
-      <section className="mt-12" aria-labelledby="h-pools">
-        <h2 id="h-pools" className="mb-3 text-xl font-bold tracking-tight">Pool</h2>
-        <PoolTable rows={rows} picked={chart.addr} onPick={(addr) => setChart({ addr })} />
-      </section>
-
-      <section className="mt-12" aria-labelledby="h-log">
-        <h2 id="h-log" className="mb-3 text-xl font-bold tracking-tight">Alert</h2>
-        <ul className="max-w-[78ch] border-t-2 border-foreground">
-          {alerts.length === 0 && (
-            <li className="border-b border-border py-2 text-muted-foreground">
-              Belum ada lonjakan. Alert muncul di sini dan berbunyi saat sebuah pool melewati aturan di atas.
-            </li>
-          )}
-          {alerts.map((a) => (
-            <li key={a.id} className="border-b border-border py-2">
-              <span className="inline-block min-w-[6.5em] text-muted-foreground">{a.time}</span>
-              <b>{a.pool}</b> {a.text}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <footer className="mt-14 max-w-[70ch] text-[13px] text-muted-foreground">
-        Data dari API publik Meteora, diambil langsung oleh browser kamu. Halaman harus tetap terbuka supaya alert jalan. Bukan saran investasi.
-      </footer>
     </div>
   )
 }

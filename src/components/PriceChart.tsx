@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ChartCandlestickIcon, ChartLineIcon } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { POOLS, POOL_ADDRESSES, TF_SEC, TIMEFRAMES, fetchCandles, fmtPrice, spikeFlags, usd, type Candle, type Rule, type Timeframe } from '@/lib/meteora'
+import { POOLS, TF_SEC, TIMEFRAMES, fetchCandles, fmtPrice, spikeFlags, usd, type Candle, type Rule, type Timeframe } from '@/lib/meteora'
 
 export type ChartType = 'candle' | 'line'
 
-const COLOR = { ink: '#1b2a38', soft: '#55646f', trace: '#2c5c8f', up: '#1f7a5c', down: '#b4452f', rule: 'rgba(27,42,56,.14)' }
-const FONT = '11px "Schibsted Grotesk Variable", system-ui, sans-serif'
-const poolItems = POOL_ADDRESSES.map((a) => ({ value: a, label: POOLS[a] }))
+const COLOR = { ink: '#18181b', soft: '#71717a', up: '#16a34a', down: '#dc2626', rule: '#e4e4e7', band: '#fef3c7' }
+const FONT = '11px "Geist Variable", system-ui, sans-serif'
 
-const toggleCls = 'h-9 rounded-none border-2 border-foreground px-3 text-[15px] aria-pressed:bg-foreground aria-pressed:text-background hover:bg-muted'
+const segCls = 'gap-0.5 rounded-lg bg-muted p-[3px]'
+const segItemCls =
+  'h-8 gap-1.5 rounded-md px-3 text-[13px] font-medium text-muted-foreground hover:bg-transparent hover:text-foreground aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm aria-pressed:hover:bg-card'
 
 function fmtTime(t: number, tf: Timeframe) {
   const d = new Date(t * 1000)
@@ -95,7 +96,7 @@ export function PriceChart({ addr, tf, type, rule, onChange }: Props) {
 
     flags.forEach((f, i) => {
       if (!f) return
-      g.fillStyle = 'rgba(245,207,69,.6)'
+      g.fillStyle = COLOR.band
       g.fillRect(i * slot, 0, slot, vTop + volH + 4)
     })
 
@@ -114,7 +115,7 @@ export function PriceChart({ addr, tf, type, rule, onChange }: Props) {
     for (let i = 0; i < candles.length; i += step) g.fillText(fmtTime(candles[i].timestamp, tf), Math.min(Math.max(X(i), 24), pw - 24), size.h - 6)
 
     candles.forEach((c, i) => {
-      g.fillStyle = c.close >= c.open ? 'rgba(31,122,92,.5)' : 'rgba(180,69,47,.5)'
+      g.fillStyle = c.close >= c.open ? 'rgba(22,163,74,.33)' : 'rgba(220,38,38,.33)'
       const vh = (c.volume / vmax) * volH
       g.fillRect(X(i) - bw / 2, vTop + volH - vh, bw, vh)
     })
@@ -129,15 +130,15 @@ export function PriceChart({ addr, tf, type, rule, onChange }: Props) {
     } else {
       g.beginPath()
       candles.forEach((c, i) => (i ? g.lineTo(X(i), Y(c.close)) : g.moveTo(X(i), Y(c.close))))
-      g.strokeStyle = COLOR.trace; g.lineWidth = 2; g.lineJoin = 'round'; g.stroke()
+      g.strokeStyle = COLOR.ink; g.lineWidth = 1.75; g.lineJoin = 'round'; g.stroke()
     }
 
     const last = candles[candles.length - 1]
     const ly = Math.round(Y(last.close)) + 0.5
-    g.lineWidth = 1; g.setLineDash([4, 3]); g.strokeStyle = COLOR.ink
+    g.lineWidth = 1; g.setLineDash([4, 3]); g.strokeStyle = 'rgba(24,24,27,.4)'
     g.beginPath(); g.moveTo(0, ly); g.lineTo(pw, ly); g.stroke(); g.setLineDash([])
-    g.fillStyle = COLOR.ink; g.fillRect(pw, ly - 9, layout.padR, 18)
-    g.fillStyle = '#e8ede6'; g.textAlign = 'left'; g.fillText(fmtPrice(last.close), pw + 5, ly + 4)
+    g.fillStyle = COLOR.ink; g.beginPath(); g.roundRect(pw + 2, ly - 9, layout.padR - 4, 18, 4); g.fill()
+    g.fillStyle = '#fafafa'; g.textAlign = 'left'; g.fillText(fmtPrice(last.close), pw + 7, ly + 4)
 
     if (hover >= 0 && hover < candles.length) {
       const hx = Math.round(X(hover)) + 0.5
@@ -159,53 +160,45 @@ export function PriceChart({ addr, tf, type, rule, onChange }: Props) {
   const hchg = hc ? (hc.close / hc.open - 1) * 100 : 0
 
   return (
-    <div>
-      <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-2">
-        <Select value={addr} onValueChange={(v) => v && onChange({ addr: v })} items={poolItems}>
-          <SelectTrigger aria-label="Pool" className="h-9 w-44 rounded-none border-2 border-foreground bg-transparent px-3 text-[15px] font-bold">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent alignItemWithTrigger={false} className="rounded-none border-2 border-foreground ring-0">
-            {poolItems.map((p) => (
-              <SelectItem key={p.value} value={p.value} className="rounded-none">
-                {p.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <ToggleGroup spacing={0} value={[tf]} onValueChange={(v) => v[0] && onChange({ tf: v[0] as Timeframe })} aria-label="Timeframe">
+    <div className="flex flex-col gap-4 rounded-xl border bg-card p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <ToggleGroup spacing={0} className={segCls} value={[tf]} onValueChange={(v) => v[0] && onChange({ tf: v[0] as Timeframe })} aria-label="Timeframe">
           {TIMEFRAMES.map((t) => (
-            <ToggleGroupItem key={t} value={t} className={`${toggleCls} -ml-[2px] first:ml-0`}>
+            <ToggleGroupItem key={t} value={t} className={segItemCls}>
               {t}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
 
-        <ToggleGroup spacing={0} value={[type]} onValueChange={(v) => v[0] && onChange({ type: v[0] as ChartType })} aria-label="Tipe chart">
-          <ToggleGroupItem value="candle" className={toggleCls}>Candlestick</ToggleGroupItem>
-          <ToggleGroupItem value="line" className={`${toggleCls} -ml-[2px]`}>Line</ToggleGroupItem>
+        <ToggleGroup spacing={0} className={segCls} value={[type]} onValueChange={(v) => v[0] && onChange({ type: v[0] as ChartType })} aria-label="Tipe chart">
+          <ToggleGroupItem value="candle" className={segItemCls}>
+            <ChartCandlestickIcon className="size-3.5" />
+            Candle
+          </ToggleGroupItem>
+          <ToggleGroupItem value="line" className={segItemCls}>
+            <ChartLineIcon className="size-3.5" />
+            Line
+          </ToggleGroupItem>
         </ToggleGroup>
       </div>
 
-      <div ref={boxRef} className="relative h-[320px] border-2 border-foreground bg-white/35 md:h-[380px]" onMouseMove={onMove} onMouseLeave={() => setHover(-1)}>
+      <div ref={boxRef} className="relative h-[300px] md:h-[360px]" onMouseMove={onMove} onMouseLeave={() => setHover(-1)}>
         <canvas ref={canvasRef} role="img" aria-label={`Chart harga dan volume ${POOLS[addr]}`} className="block h-full w-full" />
         {hc && (
-          <div className="pointer-events-none absolute z-10 whitespace-nowrap bg-foreground px-3 py-2 text-[13px] leading-normal text-background" style={{ left: tip.x, top: tip.y }}>
+          <div className="pointer-events-none absolute z-10 whitespace-nowrap rounded-lg bg-foreground px-3 py-2 text-[13px] leading-normal text-background shadow-md" style={{ left: tip.x, top: tip.y }}>
             <b>{new Date(hc.timestamp * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</b>
             <br />Open {fmtPrice(hc.open)}, high {fmtPrice(hc.high)}
             <br />Low {fmtPrice(hc.low)}, close {fmtPrice(hc.close)}
             <br />
             <span style={{ color: hchg >= 0 ? '#8fd8b8' : '#f0a08e' }}>{hchg >= 0 ? '+' : ''}{hchg.toFixed(2)}%</span> dengan volume {usd(hc.volume)}
-            {flags[hover] && <><br /><span className="text-mark">Memicu alert</span></>}
+            {flags[hover] && <><br /><span className="text-amber">Memicu alert</span></>}
           </div>
         )}
       </div>
 
-      <p className="mt-2 text-[13px] text-muted-foreground">
-        <span className="mr-1.5 inline-block h-2.5 w-3.5 bg-mark align-[-1px]" />
-        Candle dengan pita kuning akan memicu alert dengan aturan di atas.{' '}
-        {candles.length ? (hits ? `${hits} dari ${candles.length} candle terpicu.` : `Tidak ada dari ${candles.length} candle yang terpicu.`) : error}
+      <p className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="size-3 rounded-[3px] bg-amber" />
+        Candle yang memicu alert{error && !candles.length ? `. ${error}` : hits ? ` (${hits})` : ''}
       </p>
     </div>
   )
