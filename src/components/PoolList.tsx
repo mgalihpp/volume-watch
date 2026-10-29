@@ -8,17 +8,13 @@ import { cn } from '@/lib/utils'
 interface Props {
   pools: Record<string, PoolInfo>
   rows: Record<string, PoolRow>
-  rule: Rule
   picked: string
   onPick: (addr: string) => void
-  /** Satu baris per pool, dipakai di bottom sheet mobile */
-  dense?: boolean
 }
 
-export function PoolList({ pools, rows, rule, picked, onPick, dense }: Props) {
-  if (dense) return <DenseList pools={pools} rows={rows} rule={rule} picked={picked} onPick={onPick} />
+export function PoolList({ pools, rows, rule, picked, onPick }: Props & { rule: Rule }) {
   return (
-    <div role="tablist" aria-label="Pool" className="flex flex-col gap-2 md:grid md:grid-cols-4 lg:flex lg:flex-col">
+    <div role="tablist" aria-label="Pool" className="flex flex-col gap-3">
       {Object.entries(pools).map(([addr, pool]) => {
         const r = rows[addr]
         const on = picked === addr
@@ -31,19 +27,19 @@ export function PoolList({ pools, rows, rule, picked, onPick, dense }: Props) {
             aria-selected={on}
             onClick={() => onPick(addr)}
             className={cn(
-              'flex min-w-0 flex-col gap-2.5 rounded-xl border p-3 text-left transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/40 sm:px-4 sm:py-3.5',
-              on ? 'border-foreground/15 bg-card shadow-[0_1px_2px_rgb(0_0_0/0.06)]' : 'border-border/60 hover:bg-card/70 lg:border-transparent',
+              'flex min-w-0 flex-col gap-3 rounded-[20px] border p-4 text-left transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/40',
+              on ? 'border-up/40 bg-up/[0.06] shadow-[0_0_28px_-8px_var(--up)]' : 'bg-card hover:border-foreground/20',
             )}
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2.5">
               <TokenPair x={pool.x} y={pool.y} />
-              <span className="truncate font-semibold">{pair}</span>
-              {r?.isSpike && <span className="ml-auto size-2 shrink-0 animate-pulse rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
+              <span className="truncate font-bold">{pair}</span>
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{bin}</span>
+              {r?.isSpike && <span className="ml-auto size-2 shrink-0 animate-pulse rounded-full bg-amber-strong shadow-[0_0_8px_var(--amber-strong)]" aria-label="Sedang lonjakan" />}
             </span>
-            <span className="text-[15px] font-medium tabular-nums">{r ? <Price value={r.price} /> : '–'}</span>
-            <span className="flex items-center justify-between gap-2 text-xs text-muted-foreground tabular-nums">
-              <span className="rounded-md bg-muted px-1.5 py-px text-[11px] font-medium">{bin}</span>
-              <span className="truncate">{r?.vol1m == null ? 'menghitung…' : `${usdShort(r.vol1m)}/mnt`}</span>
+            <span className="flex items-baseline justify-between gap-2 tabular-nums">
+              <span className="text-[17px] font-semibold">{r ? <Price value={r.price} /> : '–'}</span>
+              <span className="truncate text-xs text-muted-foreground">{r?.vol1m == null ? 'menghitung…' : `${usdShort(r.vol1m)}/mnt`}</span>
             </span>
             <Meter value={spikeProgress(r, rule)} hot={r?.isSpike} />
           </button>
@@ -53,35 +49,24 @@ export function PoolList({ pools, rows, rule, picked, onPick, dense }: Props) {
   )
 }
 
-function DenseList({ pools, rows, rule, picked, onPick }: Omit<Props, 'dense'>) {
+/** Versi layar kecil: chip horizontal yang bisa digeser. */
+export function PoolChips({ pools, rows, picked, onPick }: Props) {
   return (
-    <div role="listbox" aria-label="Pool" className="flex flex-col">
+    <div role="tablist" aria-label="Pool" className="flex gap-2">
       {Object.entries(pools).map(([addr, pool]) => {
-        const r = rows[addr]
         const on = picked === addr
-        const { pair, bin } = splitName(pool.name)
         return (
           <button
             key={addr}
             type="button"
-            role="option"
+            role="tab"
             aria-selected={on}
             onClick={() => onPick(addr)}
-            className={cn('flex flex-col gap-2.5 rounded-xl px-3 py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/40', on ? 'bg-muted' : 'active:bg-muted/60')}
+            className={cn('flex h-9 shrink-0 items-center gap-2 rounded-full border pr-3.5 pl-2 text-[13px] font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/40', on ? 'border-up/50 bg-up/10' : 'bg-card')}
           >
-            <span className="flex items-center gap-3">
-              <TokenPair x={pool.x} y={pool.y} size="lg" />
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="flex min-w-0 items-center gap-2 font-semibold">
-                  <span className="truncate">{pair}</span>
-                  <span className="shrink-0 rounded-md bg-background px-1.5 py-px text-[11px] font-medium text-muted-foreground">{bin}</span>
-                  {r?.isSpike && <span className="size-2 shrink-0 animate-pulse rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
-                </span>
-                <span className="text-xs text-muted-foreground tabular-nums">{r?.vol1m == null ? 'menghitung volume…' : `${usdShort(r.vol1m)} per menit`}</span>
-              </span>
-              <span className="shrink-0 text-[15px] font-medium tabular-nums">{r ? <Price value={r.price} /> : '–'}</span>
-            </span>
-            <Meter value={spikeProgress(r, rule)} hot={r?.isSpike} className="ml-11" />
+            <TokenPair x={pool.x} y={pool.y} />
+            {splitName(pool.name).pair}
+            {rows[addr]?.isSpike && <span className="size-1.5 rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
           </button>
         )
       })}

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="rim" x1="4" y1="2" x2="44" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B6F26A"/>
+      <stop offset=".55" stop-color="#2DD4BF"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="14" x2="0" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C8FF7A"/>
+      <stop offset="1" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <linearGradient id="hot" x1="0" y1="9" x2="0" y2="38" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD166"/>
+      <stop offset="1" stop-color="#FF7A45"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(24 46) rotate(-90) scale(30 34)">
+      <stop stop-color="#B6F26A" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#B6F26A" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="halo" x="-60%" y="-30%" width="220%" height="160%">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+  <rect x=".75" y=".75" width="46.5" height="46.5" rx="14" fill="#0A0E14"/>
+  <rect x=".75" y=".75" width="46.5" height="46.5" rx="14" fill="url(#glow)"/>
+  <rect x=".75" y=".75" width="46.5" height="46.5" rx="14" stroke="url(#rim)" stroke-width="1.5"/>
+  <rect x="9.5" y="27" width="5.5" height="11" rx="2.75" fill="url(#bar)" opacity=".55"/>
+  <rect x="17" y="22" width="5.5" height="16" rx="2.75" fill="url(#bar)" opacity=".8"/>
+  <rect x="24.5" y="17" width="5.5" height="21" rx="2.75" fill="url(#bar)"/>
+  <rect x="32" y="11" width="5.5" height="27" rx="2.75" fill="#FFB020" opacity=".55" filter="url(#halo)"/>
+  <rect x="32" y="11" width="5.5" height="27" rx="2.75" fill="url(#hot)"/>
+  <path d="M31.2 8.2a4.6 4.6 0 0 1 7.1 0M28.4 5.6a8.4 8.4 0 0 1 12.7 0" stroke="#FFB020" stroke-width="1.6" stroke-linecap="round"/>
+</svg>

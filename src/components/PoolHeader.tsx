@@ -1,4 +1,3 @@
-import { PoolSheet } from '@/components/PoolSheet'
 import { Price } from '@/components/Price'
 import { Meter } from '@/components/SpikeMeter'
 import { TokenPair } from '@/components/TokenPair'
@@ -18,11 +17,9 @@ interface Props {
   rule: Rule
   candles: Candle[]
   tf: Timeframe
-  onPick: (addr: string) => void
-  onManage?: () => void
 }
 
-export function PoolHeader({ addr, pools, rows, rule, candles, tf, onPick, onManage }: Props) {
+export function PoolHeader({ addr, pools, rows, rule, candles, tf }: Props) {
   const row = rows[addr]
   const pool = pools[addr]
   const { pair, bin } = splitName(pool.name)
@@ -35,27 +32,31 @@ export function PoolHeader({ addr, pools, rows, rule, candles, tf, onPick, onMan
   const vol1m = row?.vol1m ?? null
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <span className="flex min-w-0">
-          <PoolSheet pools={pools} rows={rows} rule={rule} picked={addr} onPick={onPick} onManage={onManage}>
-            <TokenPair x={pool.x} y={pool.y} size="lg" />
-            <span className="truncate font-semibold text-foreground">{pair}</span>
-            <span className="shrink-0 rounded-md bg-muted px-1.5 py-px text-[11px] font-medium text-muted-foreground">{bin}</span>
-          </PoolSheet>
+    <div className="flex flex-col gap-4 rounded-3xl border bg-card p-5 sm:gap-5 sm:p-7">
+      <div className="flex flex-col gap-3">
+        <span className="flex min-w-0 items-center gap-3">
+          <TokenPair x={pool.x} y={pool.y} size="lg" />
+          <span className="truncate text-xl font-bold sm:text-[26px]">{pair}</span>
+          <span className="shrink-0 rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">{bin}</span>
+          {row?.isSpike && (
+            <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-amber-strong/15 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-amber-strong uppercase">
+              <span className="size-1.5 animate-pulse rounded-full bg-amber-strong" />
+              Lonjakan
+            </span>
+          )}
         </span>
-        <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1 tabular-nums">
-          <span className="text-4xl leading-none font-semibold tracking-tight md:text-[44px]">{price ? <Price value={price} /> : '–'}</span>
+        <span className="flex flex-wrap items-center gap-x-4 gap-y-2 tabular-nums">
+          <span className="text-4xl leading-none font-bold tracking-tighter sm:text-[52px]">{price ? <Price value={price} /> : '–'}</span>
           {chg != null && (
-            <span className={cn('text-sm font-medium whitespace-nowrap', chg >= 0 ? 'text-up' : 'text-down')}>
+            <span className={cn('flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold whitespace-nowrap', chg >= 0 ? 'bg-up/10 text-up' : 'bg-down/10 text-down')}>
               {chg >= 0 ? '+' : ''}
-              {chg.toFixed(2)}%<span className="ml-1.5 font-normal text-muted-foreground">{spanLabel(Math.min(span, 86400))}</span>
+              {chg.toFixed(2)}%<span className="font-normal opacity-70">{spanLabel(Math.min(span, 86400))}</span>
             </span>
           )}
         </span>
       </div>
 
-      <dl className="grid grid-cols-2 gap-x-5 gap-y-5 rounded-xl bg-muted/50 p-4 md:grid-cols-3 md:gap-x-10 md:px-5">
+      <dl className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
         <Stat label="Volume 1 menit" value={vol1m == null ? '–' : usdShort(vol1m)} goal={`batas ${usdShort(rule.minUsd)}`} progress={vol1m == null ? null : vol1m / rule.minUsd} hot={row?.isSpike} />
         <Stat
           label="Dibanding normal"
@@ -81,12 +82,12 @@ interface StatProps {
 
 function Stat({ label, value, goal, progress, hot, className }: StatProps) {
   return (
-    <div className={cn('flex min-w-0 flex-col gap-2', className)}>
-      <dt className="truncate text-xs text-muted-foreground">{label}</dt>
-      <dd className="truncate text-lg leading-none font-semibold tabular-nums">{value}</dd>
+    <div className={cn('flex min-w-0 flex-col gap-2.5 rounded-2xl bg-muted p-3.5 sm:p-[18px]', className)}>
+      <dt className="truncate text-[10px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">{label}</dt>
+      <dd className={cn('truncate text-xl leading-none font-bold tabular-nums sm:text-2xl', hot && 'text-amber-strong')}>{value}</dd>
       {goal && (
         <>
-          <Meter value={progress == null ? null : Math.min(progress, 1)} hot={hot} className="mt-1 bg-foreground/10" />
+          <Meter value={progress == null ? null : Math.min(progress, 1)} hot={hot} className="bg-foreground/10" />
           <span className="text-[11px] text-muted-foreground tabular-nums">{goal}</span>
         </>
       )}

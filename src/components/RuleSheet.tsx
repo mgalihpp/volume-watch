@@ -18,7 +18,7 @@ const FIELDS: { key: keyof Rule; label: string; unit: string; min: number; step:
 const toDraft = (r: Rule) => ({ mult: String(r.mult), baseline: String(r.baseline), minUsd: String(r.minUsd), interval: String(r.interval) })
 
 const inputCls =
-  'h-9 rounded-lg text-right font-medium tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
+  'h-9 rounded-xl text-right font-medium tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
 
 interface Props {
   rule: Rule
@@ -73,13 +73,13 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
         setOpen(o)
       }}
     >
-      <SheetTrigger render={<Button variant="outline" aria-label="Aturan alert" />}>
+      <SheetTrigger render={<Button size="lg" className="h-10 rounded-full px-3 font-bold sm:px-5" aria-label="Aturan alert" />}>
         <SlidersHorizontalIcon />
         <span className="hidden sm:inline">Aturan alert</span>
       </SheetTrigger>
       <SheetContent className="gap-7 p-7 sm:max-w-[420px]">
         <SheetHeader className="p-0">
-          <SheetTitle className="text-lg font-semibold">Aturan alert</SheetTitle>
+          <SheetTitle className="text-2xl font-bold tracking-tight">Aturan alert</SheetTitle>
           <SheetDescription>
             {bot
               ? 'Berlaku untuk website dan bot Telegram. Volume dihitung per 1 menit dari data Meteora, dibanding median beberapa menit sebelumnya.'
@@ -89,7 +89,7 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
 
         <div className="flex flex-col gap-4">
           {FIELDS.map((f) => (
-            <div key={f.key} className="flex items-center justify-between gap-4">
+            <div key={f.key} className="flex items-center justify-between gap-4 rounded-2xl border bg-muted/50 px-4 py-3">
               <Label htmlFor={`rule-${f.key}`} className="text-sm font-medium">
                 {f.label}
               </Label>
@@ -121,7 +121,7 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
 
         <div className="mt-auto flex flex-col gap-3">
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-          <Button onClick={save} disabled={!valid || saving} className="h-10 w-full">
+          <Button onClick={save} disabled={!valid || saving} className="h-11 w-full rounded-full text-[15px] font-bold">
             {saving && <LoaderCircleIcon className="animate-spin" />}
             {bot ? 'Simpan ke bot' : 'Simpan'}
           </Button>

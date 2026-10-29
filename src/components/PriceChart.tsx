@@ -5,14 +5,14 @@ import { TF_SEC, fmtPrice, usdShort, type Candle, type Timeframe } from '@/lib/m
 
 export type ChartType = 'candle' | 'line'
 
-const FONT = '11px "Geist Variable", system-ui, sans-serif'
+const FONT = '11px "Inter Variable", system-ui, sans-serif'
 const DEFAULT_COUNT = 90
 const MIN_COUNT = 20
 const MAX_COUNT = 400
 
-const segCls = 'gap-0.5 rounded-lg bg-muted p-[3px]'
+const segCls = 'gap-0.5 rounded-full bg-muted p-[3px]'
 const segItemCls =
-  'h-7 min-w-0 gap-1.5 rounded-md px-1.5 text-xs sm:px-2.5 sm:text-[13px] font-medium text-muted-foreground hover:bg-transparent hover:text-foreground aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm aria-pressed:hover:bg-card'
+  'h-8 min-w-0 gap-1.5 rounded-full px-2.5 text-xs sm:px-4 sm:text-[13px] font-semibold text-muted-foreground hover:bg-transparent hover:text-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary'
 
 function fmtTime(t: number, tf: Timeframe, span: number) {
   const d = new Date(t * 1000)
@@ -186,7 +186,7 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
       g.lineWidth = 1; g.setLineDash([3, 3]); g.strokeStyle = lastCol
       g.beginPath(); g.moveTo(0, ly); g.lineTo(pw, ly); g.stroke(); g.setLineDash([])
       g.fillStyle = lastCol; g.beginPath(); g.roundRect(pw + 3, ly - 10, layout.padR - 4, 20, 5); g.fill()
-      g.fillStyle = '#fff'; g.textAlign = 'left'; g.fillText(fmtPrice(last.close), pw + 8, ly + 4)
+      g.fillStyle = dark ? '#07090d' : '#fff'; g.textAlign = 'left'; g.fillText(fmtPrice(last.close), pw + 8, ly + 4)
     }
 
     if (hover >= 0 && hover < vis.length) {

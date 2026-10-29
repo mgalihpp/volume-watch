@@ -1,12 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/inter";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-sans: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-heading: var(--font-sans);
     --color-ring: var(--ring);
     --color-input: var(--input);
@@ -39,58 +39,62 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Netral dingin, satu warna sinyal (amber) khusus untuk lonjakan */
+/* Web3: gelap ala Jupiter dengan aksen lime; amber khusus untuk lonjakan */
 :root {
-    --background: #f4f5f7;
-    --foreground: #14161a;
+    --background: #f3f5f9;
+    --foreground: #0e1320;
     --card: #ffffff;
-    --card-foreground: #14161a;
+    --card-foreground: #0e1320;
     --popover: #ffffff;
-    --popover-foreground: #14161a;
-    --primary: #14161a;
-    --primary-foreground: #ffffff;
-    --secondary: #eceef1;
-    --secondary-foreground: #14161a;
-    --muted: #eceef1;
-    --muted-foreground: #6b717c;
-    --accent: #eceef1;
-    --accent-foreground: #14161a;
-    --destructive: #dc2626;
-    --border: #e3e5e9;
-    --input: #dcdfe4;
-    --ring: #9aa1ac;
-    --radius: 0.75rem;
-    --up: #12a150;
-    --down: #e0352b;
-    --amber: #fdf0d2;
-    --amber-strong: #e08a00;
-    --grid: #eef0f3;
+    --popover-foreground: #0e1320;
+    --primary: #b6f26a;
+    --primary-foreground: #07090d;
+    --secondary: #0f172a0d;
+    --secondary-foreground: #0e1320;
+    --muted: #0f172a0d;
+    --muted-foreground: #5b6678;
+    --accent: #0f172a0d;
+    --accent-foreground: #0e1320;
+    --destructive: #e5484d;
+    --border: #0f172a14;
+    --input: #0f172a1f;
+    --ring: #16a34a;
+    --radius: 0.875rem;
+    --up: #16a34a;
+    --down: #e5484d;
+    --amber: rgba(255, 176, 32, 0.22);
+    --amber-strong: #d97706;
+    --grid: #0f172a0f;
+    --glow-a: rgba(139, 92, 246, 0.14);
+    --glow-b: rgba(182, 242, 106, 0.28);
 }
 
 .dark {
-    --background: #0e1013;
-    --foreground: #e9ebee;
-    --card: #15181c;
-    --card-foreground: #e9ebee;
-    --popover: #15181c;
-    --popover-foreground: #e9ebee;
-    --primary: #e9ebee;
-    --primary-foreground: #0e1013;
-    --secondary: #1d2126;
-    --secondary-foreground: #e9ebee;
-    --muted: #1d2126;
-    --muted-foreground: #8a919c;
-    --accent: #1d2126;
-    --accent-foreground: #e9ebee;
-    --destructive: #f0544a;
-    --border: #252a30;
-    --input: #2c3138;
-    --ring: #5b636e;
-    --up: #2fbf6b;
-    --down: #f0544a;
-    --amber: rgba(240, 160, 30, 0.16);
-    --amber-strong: #f2a516;
-    --grid: #1c2025;
+    --background: #07090d;
+    --foreground: #eef1f6;
+    --card: #0f141c;
+    --card-foreground: #eef1f6;
+    --popover: #121824;
+    --popover-foreground: #eef1f6;
+    --primary: #b6f26a;
+    --primary-foreground: #07090d;
+    --secondary: #ffffff0f;
+    --secondary-foreground: #eef1f6;
+    --muted: #ffffff0f;
+    --muted-foreground: #7c8696;
+    --accent: #ffffff0f;
+    --accent-foreground: #eef1f6;
+    --destructive: #ff5c7a;
+    --border: #ffffff14;
+    --input: #ffffff1f;
+    --ring: #b6f26a;
+    --up: #b6f26a;
+    --down: #ff5c7a;
+    --amber: rgba(255, 176, 32, 0.16);
+    --amber-strong: #ffb020;
+    --grid: #ffffff0d;
+    --glow-a: rgba(139, 92, 246, 0.25);
+    --glow-b: rgba(182, 242, 106, 0.15);
 }
 
 @layer base {
@@ -103,6 +107,10 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    background-image: radial-gradient(800px 560px at -5% -8%, var(--glow-a), transparent 70%), radial-gradient(800px 520px at 100% -10%, var(--glow-b), transparent 70%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-feature-settings: 'tnum' 0;
     font-size: 14px;
     line-height: 1.5;
   }

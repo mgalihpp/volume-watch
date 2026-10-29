@@ -1,70 +1,55 @@
-import { BellIcon } from 'lucide-react'
+import { ArrowRightIcon, BellIcon } from 'lucide-react'
+import { Popover } from '@base-ui/react/popover'
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { AlertRow } from '@/components/AlertsPage'
 import type { AlertEntry } from '@/hooks/usePoolMonitor'
 import { useStored } from '@/hooks/useStored'
-import { usdShort } from '@/lib/meteora'
 
-interface Props {
-  alerts: AlertEntry[]
-  /** Waktu cek terakhir bot VPS (detik); ada berarti riwayat datang dari bot, bukan dari tab ini. */
-  botUpdated?: number
-}
+export const useSeenAlerts = () => useStored('alerts-seen', { seen: 0 })
 
-/** Tombol lonceng di header; angka di badge = alert yang belum dilihat. */
-export function AlertMenu({ alerts, botUpdated }: Props) {
-  const [{ seen }, setSeen] = useStored('alerts-seen', { seen: 0 })
+/** Lonceng di header: dropdown 4 alert terbaru, lengkapnya ada di halaman Alert. */
+export function AlertMenu({ alerts }: { alerts: AlertEntry[] }) {
+  const [{ seen }, setSeen] = useSeenAlerts()
   const unseen = alerts.filter((a) => a.id > seen).length
-  const botAlive = botUpdated != null && Date.now() / 1000 - botUpdated < 300
+  const markSeen = () => alerts[0] && setSeen({ seen: alerts[0].id })
 
   return (
-    <Sheet onOpenChange={(o) => o && alerts[0] && setSeen({ seen: alerts[0].id })}>
-      <SheetTrigger render={<Button variant="outline" size="icon" className="relative" aria-label={`Riwayat alert${unseen ? `, ${unseen} baru` : ''}`} />}>
+    <Popover.Root>
+      <Popover.Trigger render={<Button variant="outline" size="icon-lg" className="relative rounded-full" aria-label={`Riwayat alert${unseen ? `, ${unseen} baru` : ''}`} />}>
         <BellIcon />
-        {unseen > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-amber-strong px-1 text-[10px] font-semibold text-white tabular-nums">
-            {unseen > 9 ? '9+' : unseen}
-          </span>
-        )}
-      </SheetTrigger>
-      <SheetContent className="gap-5 p-6 sm:max-w-[380px]">
-        <SheetHeader className="p-0">
-          <SheetTitle className="text-lg font-semibold">Riwayat alert</SheetTitle>
-          <SheetDescription>
-            {botUpdated == null ? (
-              'Lonjakan volume sejak halaman ini dibuka.'
+        {unseen > 0 && <span className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-amber-strong ring-2 ring-background" />}
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner side="bottom" align="end" sideOffset={10} className="z-50">
+          <Popover.Popup className="w-[min(420px,calc(100vw-2rem))] origin-top-right rounded-3xl border bg-popover p-2 text-popover-foreground shadow-2xl outline-none transition duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
+            <div className="flex items-center justify-between px-3 pt-3 pb-2">
+              <span className="text-[15px] font-bold">Alert</span>
+              {unseen > 0 && (
+                <button type="button" onClick={markSeen} className="text-xs font-semibold text-up hover:underline">
+                  Tandai sudah dibaca
+                </button>
+              )}
+            </div>
+            {alerts.length === 0 ? (
+              <p className="px-3 py-8 text-center text-[13px] text-muted-foreground">Belum ada lonjakan. Alert muncul di sini saat bar pool penuh.</p>
             ) : (
-              <span className="flex items-center gap-2">
-                <span className={botAlive ? 'size-1.5 rounded-full bg-up' : 'size-1.5 rounded-full bg-down'} />
-                {botAlive ? 'Dari bot VPS, tetap tercatat saat website ditutup.' : 'Bot VPS tidak merespons. Riwayat mungkin tertinggal.'}
-              </span>
+              <ul className="flex flex-col">
+                {alerts.slice(0, 4).map((a) => (
+                  <AlertRow key={a.id} alert={a} fresh={a.id > seen} />
+                ))}
+              </ul>
             )}
-          </SheetDescription>
-        </SheetHeader>
-        {alerts.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed px-6 py-10 text-center text-muted-foreground">
-            <BellIcon className="size-5" />
-            <span className="text-[13px] leading-snug">Belum ada lonjakan. Alert muncul di sini saat bar pool penuh.</span>
-          </div>
-        ) : (
-          <ul className="-mx-3 flex flex-col overflow-y-auto">
-            {alerts.map((a) => (
-              <li key={a.id} className="flex items-start gap-3 rounded-xl px-3 py-3">
-                <span className={a.id > seen ? 'mt-1.5 size-2 shrink-0 rounded-full bg-amber-strong' : 'mt-1.5 size-2 shrink-0 rounded-full bg-muted-foreground/30'} />
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="flex items-center justify-between gap-3 text-sm font-medium">
-                    {a.pool}
-                    <span className="text-xs font-normal text-muted-foreground tabular-nums">{a.time}</span>
-                  </span>
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {usdShort(a.vol)} per menit, {a.ratio}
-                  </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </SheetContent>
-    </Sheet>
+            <Popover.Close
+              render={<a href="#/alerts" />}
+              onClick={markSeen}
+              className="mt-1 flex items-center justify-center gap-1.5 rounded-2xl px-3 py-3 text-[13px] font-bold text-up hover:bg-muted"
+            >
+              Lihat semua alert
+              <ArrowRightIcon className="size-3.5" />
+            </Popover.Close>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
   )
 }

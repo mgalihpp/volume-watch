@@ -11,9 +11,9 @@ export function spikeProgress(row: PoolRow | undefined, rule: Rule) {
 
 export function Meter({ value, hot, className }: { value: number | null; hot?: boolean; className?: string }) {
   return (
-    <div className={cn('relative h-1.5 overflow-hidden rounded-full bg-muted', className)}>
+    <div className={cn('relative h-1.5 overflow-hidden rounded-full bg-foreground/10', className)}>
       <div
-        className={cn('absolute inset-y-0 left-0 rounded-full transition-[width] duration-700', hot ? 'bg-amber-strong' : 'bg-foreground/70')}
+        className={cn('absolute inset-y-0 left-0 rounded-full transition-[width] duration-700', hot ? 'bg-gradient-to-r from-amber-strong to-orange-500' : 'bg-up')}
         style={{ width: `${Math.max((value ?? 0) * 100, value ? 3 : 0)}%` }}
       />
     </div>

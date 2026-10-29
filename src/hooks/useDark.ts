@@ -7,7 +7,7 @@ const query = () => window.matchMedia('(prefers-color-scheme: dark)')
 
 /** Tema pilihan pengguna (atau ikut sistem); pasang class .dark di <html> supaya varian dark: shadcn ikut berlaku. */
 export function useDark() {
-  const [{ mode }, setStored] = useStored<{ mode: ThemeMode }>('theme', { mode: 'system' })
+  const [{ mode }, setStored] = useStored<{ mode: ThemeMode }>('theme', { mode: 'dark' })
   const [systemDark, setSystemDark] = useState(() => query().matches)
   useEffect(() => {
     const mq = query()
