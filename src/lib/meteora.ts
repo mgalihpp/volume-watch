@@ -6,10 +6,33 @@ export const POOLS: Record<string, string> = {
 }
 export const POOL_ADDRESSES = Object.keys(POOLS)
 
+export interface TokenInfo {
+  symbol: string
+  icon?: string
+}
+export interface PoolInfo {
+  name: string
+  x: TokenInfo
+  y: TokenInfo
+}
+
+/** Daftar bawaan; di VPS diganti daftar dari bot (bisa ditambah/hapus lewat website). */
+export const DEFAULT_POOLS: Record<string, PoolInfo> = Object.fromEntries(
+  Object.entries(POOLS).map(([addr, name]) => {
+    const [x, y] = name.split(' bin ')[0].split('-')
+    return [addr, { name, x: { symbol: x }, y: { symbol: y } }]
+  }),
+)
+
+export function splitName(name: string) {
+  const [pair, bin] = name.split(' bin ')
+  return { pair, bin: bin ? `bin ${bin}` : '' }
+}
+
 const QUERIES = ['DOGE-SOL', 'PEPE-SOL']
 const API = 'https://dlmm.datapi.meteora.ag'
 
-export const TF_SEC = { '5m': 300, '30m': 1800, '1h': 3600, '4h': 14400, '12h': 43200, '24h': 86400 } as const
+export const TF_SEC = { '1m': 60, '5m': 300, '30m': 1800, '1h': 3600, '4h': 14400, '12h': 43200, '24h': 86400 } as const
 export type Timeframe = keyof typeof TF_SEC
 export const TIMEFRAMES = Object.keys(TF_SEC) as Timeframe[]
 
@@ -65,10 +88,17 @@ export async function fetchPools(): Promise<Snapshot[]> {
 }
 
 export async function fetchCandles(address: string, tf: Timeframe, end = Math.floor(Date.now() / 1000), count = 96): Promise<Candle[]> {
+  if (tf === '1m') return fetchBotMinutes(address)
   // API menolak rentang 100 candle atau lebih per request
   const start = end - TF_SEC[tf] * count
   const j = await getJSON<{ data?: Candle[] }>(`${API}/pools/${address}/ohlcv?timeframe=${tf}&start_time=${start}&end_time=${end}`)
   return (j.data ?? []).filter((c) => c.open > 0)
+}
+
+/** Meteora tidak punya candle 1m; candle 1m dicatat sendiri oleh bot VPS (24 jam terakhir). */
+async function fetchBotMinutes(address: string): Promise<Candle[]> {
+  const rows = await getJSON<[number, number, number, number, number, number][]>(`./data/minutes-${address}.json`)
+  return rows.map(([timestamp, open, high, low, close, volume]) => ({ timestamp, open, high, low, close, volume }))
 }
 
 export function median(values: number[]): number {
@@ -104,12 +134,13 @@ export interface Rule {
 }
 export const DEFAULT_RULE: Rule = { mult: 3, baseline: 30, minUsd: 5000, interval: 60 }
 
-/** Candle yang akan memicu alert: volumenya >= mult x median candle sebelumnya dan >= minUsd per menit. */
+/** Candle yang memicu alert, aturannya sama dengan bot: volume >= mult x median candle sebelumnya dan >= minUsd per menit. */
 export function spikeFlags(candles: Candle[], tf: Timeframe, rule: Rule): boolean[] {
   const tfMin = TF_SEC[tf] / 60
   return candles.map((c, i) => {
-    if (i < 5) return false
-    const base = median(candles.slice(Math.max(0, i - rule.baseline), i).map((x) => x.volume))
-    return base > 0 && c.volume >= base * rule.mult && c.volume / tfMin >= rule.minUsd
+    if (i < rule.baseline) return false
+    const base = median(candles.slice(i - rule.baseline, i).map((x) => x.volume))
+    const ratio = base > 0 ? c.volume / base : Infinity
+    return c.volume > 0 && ratio >= rule.mult && c.volume / tfMin >= rule.minUsd
   })
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { AlertEntry, PoolRow } from '@/hooks/usePoolMonitor'
-import type { Rule } from '@/lib/meteora'
+import { DEFAULT_POOLS, type PoolInfo, type Rule } from '@/lib/meteora'
 
 interface RawBotAlert {
   t: number
@@ -23,8 +23,9 @@ export interface BotData {
   rule: Rule
   alerts: AlertEntry[]
   updated: number
-  /** Angka live bot per pool (candle 5m berjalan), sama persis dengan yang memicu Telegram */
+  /** Angka live bot per pool (volume 1 menit), sama persis dengan yang memicu Telegram */
   rows: Record<string, PoolRow>
+  pools: Record<string, PoolInfo>
 }
 
 function alertTime(t: number) {
@@ -42,7 +43,7 @@ export function useBotData() {
     const load = () =>
       fetch('./data/alerts.json', { cache: 'no-store' })
         .then((r) => (r.ok ? r.json() : null))
-        .then((j: { rule: Rule; alerts: RawBotAlert[]; updated: number; pools?: Record<string, RawBotPool> } | null) => {
+        .then((j: { rule: Rule; alerts: RawBotAlert[]; updated: number; pools?: Record<string, RawBotPool>; poolsInfo?: Record<string, PoolInfo> } | null) => {
           if (cancelled || !j?.rule) return
           const alerts = j.alerts
             .map((a, i) => ({
@@ -55,9 +56,11 @@ export function useBotData() {
             .reverse()
           const rows: Record<string, PoolRow> = {}
           for (const [addr, p] of Object.entries(j.pools ?? {})) {
-            rows[addr] = { vol1m: p.perMin, ratio: p.ratio ?? Infinity, base: p.base, chg: p.chg, price: p.price, vol30: 0, tvl: p.tvl, isSpike: p.spike, series: [] }
+            // ratio null dari bot artinya baseline 0: tak terhingga kalau ada volume, 0 kalau tidak
+            rows[addr] = { vol1m: p.perMin, ratio: p.ratio ?? (p.perMin > 0 ? Infinity : 0), base: p.base, chg: p.chg, price: p.price, vol30: 0, tvl: p.tvl, isSpike: p.spike, series: [] }
           }
-          setData({ rule: j.rule, alerts, updated: j.updated, rows })
+          const pools = j.poolsInfo && Object.keys(j.poolsInfo).length ? j.poolsInfo : DEFAULT_POOLS
+          setData({ rule: j.rule, alerts, updated: j.updated, rows, pools })
         })
         .catch(() => {})
     void load()
@@ -71,14 +74,15 @@ export function useBotData() {
   return { bot: data, reload }
 }
 
-/** Simpan aturan ke bot VPS; bot langsung memakainya tanpa restart. */
-export async function saveBotRule(rule: Rule): Promise<void> {
-  const r = await fetch('./api/rule', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(rule),
-  })
+async function postBot(path: string, body: unknown): Promise<void> {
+  const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
   if (r.ok) return
   const j = (await r.json().catch(() => null)) as { error?: string } | null
-  throw new Error(j?.error ?? `Gagal menyimpan (HTTP ${r.status})`)
+  throw new Error(j?.error ?? `Gagal (HTTP ${r.status})`)
 }
+
+/** Simpan aturan ke bot VPS; bot langsung memakainya tanpa restart. */
+export const saveBotRule = (rule: Rule) => postBot('./api/rule', rule)
+/** address boleh berupa link Meteora, bot mengambil alamatnya. */
+export const addBotPool = (address: string) => postBot('./api/pools/add', { address })
+export const removeBotPool = (address: string) => postBot('./api/pools/remove', { address })

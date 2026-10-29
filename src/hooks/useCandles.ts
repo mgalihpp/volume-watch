@@ -26,7 +26,7 @@ export function useCandles(addr: string, tf: Timeframe) {
         .then((c) => !cancelled && (setCandles((prev) => merge(prev, c)), setError('')))
         .catch((e: Error) => !cancelled && setError(`Chart gagal dimuat (${e.message}). Dicoba lagi dalam 30 detik.`))
     void load()
-    const id = setInterval(load, 30000)
+    const id = setInterval(load, tf === '1m' ? 15000 : 30000)
     return () => {
       cancelled = true
       clearInterval(id)
@@ -35,7 +35,7 @@ export function useCandles(addr: string, tf: Timeframe) {
 
   const loadOlder = useCallback(
     (oldest: number | undefined) => {
-      if (busy.current || exhausted.current || oldest == null) return
+      if (busy.current || exhausted.current || oldest == null || tf === '1m') return // 1m: semua riwayat sudah dimuat
       busy.current = true
       setLoadingOlder(true)
       const k = key.current

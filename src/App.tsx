@@ -1,16 +1,19 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { Settings2Icon } from 'lucide-react'
 import { AlertMenu } from '@/components/AlertMenu'
+import { ManagePools } from '@/components/ManagePools'
 import { PoolHeader } from '@/components/PoolHeader'
 import { PoolList } from '@/components/PoolList'
 import { PriceChart, type ChartType } from '@/components/PriceChart'
 import { RuleSheet } from '@/components/RuleSheet'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { Button } from '@/components/ui/button'
 import { useBotData } from '@/hooks/useBotData'
 import { useCandles } from '@/hooks/useCandles'
 import { useDark } from '@/hooks/useDark'
 import { usePoolMonitor } from '@/hooks/usePoolMonitor'
 import { useStored } from '@/hooks/useStored'
-import { DEFAULT_RULE, POOL_ADDRESSES, POOLS, TF_SEC, spikeFlags, type Rule, type Timeframe } from '@/lib/meteora'
+import { DEFAULT_POOLS, DEFAULT_RULE, POOL_ADDRESSES, TIMEFRAMES, spikeFlags, type Rule, type Timeframe } from '@/lib/meteora'
 import { cn } from '@/lib/utils'
 
 const DEFAULT_CHART = { addr: POOL_ADDRESSES[2], tf: '1h' as Timeframe, type: 'candle' as ChartType }
@@ -21,9 +24,14 @@ export default function App() {
   const { bot, reload: reloadBot } = useBotData()
   const rule = bot?.rule ?? localRule // di VPS aturan mengikuti bot Telegram
   const [saved, setChart] = useStored('chart', DEFAULT_CHART)
+  // 1m hanya ada kalau bot VPS mencatat candle-nya
+  const timeframes = bot ? TIMEFRAMES : TIMEFRAMES.filter((t) => t !== '1m')
+  const pools = bot?.pools ?? DEFAULT_POOLS
+  const [manageOpen, setManageOpen] = useState(false)
+  const onManage = bot ? () => setManageOpen(true) : undefined
   const chart = {
-    addr: saved.addr in POOLS ? saved.addr : DEFAULT_CHART.addr,
-    tf: saved.tf in TF_SEC ? saved.tf : DEFAULT_CHART.tf,
+    addr: saved.addr in pools ? saved.addr : saved.addr in DEFAULT_POOLS && !bot ? saved.addr : Object.keys(pools)[0],
+    tf: timeframes.includes(saved.tf) ? saved.tf : DEFAULT_CHART.tf,
     type: saved.type === 'line' ? 'line' : 'candle',
   } as const
   const { rows: localRows, status, alerts } = usePoolMonitor(rule)
@@ -58,15 +66,23 @@ export default function App() {
       </header>
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[264px_minmax(0,1fr)] lg:gap-8">
-        <aside className="hidden min-w-0 md:block lg:sticky lg:top-7 lg:self-start">
-          <PoolList rows={rows} rule={rule} picked={chart.addr} onPick={pick} />
+        <aside className="hidden min-w-0 flex-col gap-2 md:flex lg:sticky lg:top-7 lg:self-start">
+          <PoolList pools={pools} rows={rows} rule={rule} picked={chart.addr} onPick={pick} />
+          {onManage && (
+            <Button variant="ghost" onClick={onManage} className="h-9 justify-start self-start text-muted-foreground lg:self-stretch">
+              <Settings2Icon />
+              Kelola pool
+            </Button>
+          )}
         </aside>
 
         <main className="flex min-w-0 flex-col gap-6 rounded-2xl border bg-card p-4 sm:p-5 md:p-7">
-          <PoolHeader addr={chart.addr} rows={rows} rule={rule} candles={candles} tf={chart.tf} onPick={pick} />
-          <PriceChart {...chart} candles={candles} flags={flags} error={error} dark={dark} loadingOlder={loadingOlder} onNeedOlder={needOlder} onChange={setChart} />
+          <PoolHeader addr={chart.addr} pools={pools} rows={rows} rule={rule} candles={candles} tf={chart.tf} onPick={pick} onManage={onManage} />
+          <PriceChart {...chart} name={pools[chart.addr].name} timeframes={timeframes} candles={candles} flags={flags} error={error} dark={dark} loadingOlder={loadingOlder} onNeedOlder={needOlder} onChange={setChart} />
         </main>
       </div>
+
+      {bot && <ManagePools open={manageOpen} onOpenChange={setManageOpen} pools={pools} onChanged={reloadBot} />}
     </div>
   )
 }

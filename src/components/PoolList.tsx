@@ -2,15 +2,11 @@ import { Price } from '@/components/Price'
 import { Meter, spikeProgress } from '@/components/SpikeMeter'
 import { TokenPair } from '@/components/TokenPair'
 import type { PoolRow } from '@/hooks/usePoolMonitor'
-import { POOLS, POOL_ADDRESSES, usdShort, type Rule } from '@/lib/meteora'
+import { splitName, usdShort, type PoolInfo, type Rule } from '@/lib/meteora'
 import { cn } from '@/lib/utils'
 
-export const poolName = (addr: string) => {
-  const [pair, bin] = POOLS[addr].split(' bin ')
-  return { pair, bin: `bin ${bin}` }
-}
-
 interface Props {
+  pools: Record<string, PoolInfo>
   rows: Record<string, PoolRow>
   rule: Rule
   picked: string
@@ -19,19 +15,14 @@ interface Props {
   dense?: boolean
 }
 
-export function PoolList({ rows, rule, picked, onPick, dense }: Props) {
-  if (dense) return <DenseList rows={rows} rule={rule} picked={picked} onPick={onPick} />
+export function PoolList({ pools, rows, rule, picked, onPick, dense }: Props) {
+  if (dense) return <DenseList pools={pools} rows={rows} rule={rule} picked={picked} onPick={onPick} />
   return (
-    <div
-      role="tablist"
-      aria-label="Pool"
-      className="flex flex-col gap-2 md:grid md:grid-cols-4 lg:flex lg:flex-col"
-    >
-      {POOL_ADDRESSES.map((addr) => {
+    <div role="tablist" aria-label="Pool" className="flex flex-col gap-2 md:grid md:grid-cols-4 lg:flex lg:flex-col">
+      {Object.entries(pools).map(([addr, pool]) => {
         const r = rows[addr]
         const on = picked === addr
-        const { pair, bin } = poolName(addr)
-        const prog = spikeProgress(r, rule)
+        const { pair, bin } = splitName(pool.name)
         return (
           <button
             key={addr}
@@ -45,7 +36,7 @@ export function PoolList({ rows, rule, picked, onPick, dense }: Props) {
             )}
           >
             <span className="flex items-center gap-2">
-              <TokenPair pair={pair} />
+              <TokenPair x={pool.x} y={pool.y} />
               <span className="truncate font-semibold">{pair}</span>
               {r?.isSpike && <span className="ml-auto size-2 shrink-0 animate-pulse rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
             </span>
@@ -54,7 +45,7 @@ export function PoolList({ rows, rule, picked, onPick, dense }: Props) {
               <span className="rounded-md bg-muted px-1.5 py-px text-[11px] font-medium">{bin}</span>
               <span className="truncate">{r?.vol1m == null ? 'menghitung…' : `${usdShort(r.vol1m)}/mnt`}</span>
             </span>
-            <Meter value={prog} hot={r?.isSpike} />
+            <Meter value={spikeProgress(r, rule)} hot={r?.isSpike} />
           </button>
         )
       })}
@@ -62,13 +53,13 @@ export function PoolList({ rows, rule, picked, onPick, dense }: Props) {
   )
 }
 
-function DenseList({ rows, rule, picked, onPick }: Omit<Props, 'dense'>) {
+function DenseList({ pools, rows, rule, picked, onPick }: Omit<Props, 'dense'>) {
   return (
     <div role="listbox" aria-label="Pool" className="flex flex-col">
-      {POOL_ADDRESSES.map((addr) => {
+      {Object.entries(pools).map(([addr, pool]) => {
         const r = rows[addr]
         const on = picked === addr
-        const { pair, bin } = poolName(addr)
+        const { pair, bin } = splitName(pool.name)
         return (
           <button
             key={addr}
@@ -79,16 +70,16 @@ function DenseList({ rows, rule, picked, onPick }: Omit<Props, 'dense'>) {
             className={cn('flex flex-col gap-2.5 rounded-xl px-3 py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/40', on ? 'bg-muted' : 'active:bg-muted/60')}
           >
             <span className="flex items-center gap-3">
-              <TokenPair pair={pair} size="lg" />
+              <TokenPair x={pool.x} y={pool.y} size="lg" />
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="flex items-center gap-2 font-semibold">
-                  {pair}
-                  <span className="rounded-md bg-background px-1.5 py-px text-[11px] font-medium text-muted-foreground">{bin}</span>
-                  {r?.isSpike && <span className="size-2 animate-pulse rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
+                <span className="flex min-w-0 items-center gap-2 font-semibold">
+                  <span className="truncate">{pair}</span>
+                  <span className="shrink-0 rounded-md bg-background px-1.5 py-px text-[11px] font-medium text-muted-foreground">{bin}</span>
+                  {r?.isSpike && <span className="size-2 shrink-0 animate-pulse rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
                 </span>
                 <span className="text-xs text-muted-foreground tabular-nums">{r?.vol1m == null ? 'menghitung volume…' : `${usdShort(r.vol1m)} per menit`}</span>
               </span>
-              <span className="text-[15px] font-medium tabular-nums">{r ? <Price value={r.price} /> : '–'}</span>
+              <span className="shrink-0 text-[15px] font-medium tabular-nums">{r ? <Price value={r.price} /> : '–'}</span>
             </span>
             <Meter value={spikeProgress(r, rule)} hot={r?.isSpike} className="ml-11" />
           </button>

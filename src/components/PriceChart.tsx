@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChartCandlestickIcon, ChartLineIcon, ChevronsRightIcon, LoaderCircleIcon } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { POOLS, TF_SEC, TIMEFRAMES, fmtPrice, usdShort, type Candle, type Timeframe } from '@/lib/meteora'
+import { TF_SEC, fmtPrice, usdShort, type Candle, type Timeframe } from '@/lib/meteora'
 
 export type ChartType = 'candle' | 'line'
 
@@ -12,7 +12,7 @@ const MAX_COUNT = 400
 
 const segCls = 'gap-0.5 rounded-lg bg-muted p-[3px]'
 const segItemCls =
-  'h-7 gap-1.5 rounded-md px-2 text-[13px] sm:px-2.5 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm aria-pressed:hover:bg-card'
+  'h-7 min-w-0 gap-1.5 rounded-md px-1.5 text-xs sm:px-2.5 sm:text-[13px] font-medium text-muted-foreground hover:bg-transparent hover:text-foreground aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm aria-pressed:hover:bg-card'
 
 function fmtTime(t: number, tf: Timeframe, span: number) {
   const d = new Date(t * 1000)
@@ -29,7 +29,9 @@ function palette() {
 
 interface Props {
   addr: string
+  name: string
   tf: Timeframe
+  timeframes: Timeframe[]
   type: ChartType
   candles: Candle[]
   flags: boolean[]
@@ -40,7 +42,7 @@ interface Props {
   onChange: (patch: { tf?: Timeframe; type?: ChartType }) => void
 }
 
-export function PriceChart({ addr, tf, type, candles, flags, error, dark, loadingOlder, onNeedOlder, onChange }: Props) {
+export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, error, dark, loadingOlder, onNeedOlder, onChange }: Props) {
   const [hover, setHover] = useState(-1)
   const [size, setSize] = useState({ w: 0, h: 0 })
   // Jendela tampilan: `right` = jumlah candle tersembunyi di kanan (0 berarti mengikuti candle terbaru)
@@ -138,11 +140,12 @@ export function PriceChart({ addr, tf, type, candles, flags, error, dark, loadin
     g.fillStyle = C.soft
     g.lineWidth = 1
     g.textAlign = 'left'
+    const lastY = Y(candles[n - 1].close)
     for (let i = 0; i <= 4; i++) {
       const p = min + ((max - min) * i) / 4
       const y = Math.round(Y(p)) + 0.5
       g.beginPath(); g.moveTo(0, y); g.lineTo(pw, y); g.stroke()
-      g.fillText(fmtPrice(p), pw + 8, y + 4)
+      if (Math.abs(y - lastY) > 16) g.fillText(fmtPrice(p), pw + 8, y + 4) // jangan tertimpa label harga terakhir
     }
     g.textAlign = 'center'
     const tspan = vis[vis.length - 1].timestamp - vis[0].timestamp
@@ -249,7 +252,7 @@ export function PriceChart({ addr, tf, type, candles, flags, error, dark, loadin
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-2">
         <ToggleGroup spacing={0} className={segCls} value={[tf]} onValueChange={(v) => v[0] && onChange({ tf: v[0] as Timeframe })} aria-label="Timeframe">
-          {TIMEFRAMES.map((t) => (
+          {timeframes.map((t) => (
             <ToggleGroupItem key={t} value={t} className={segItemCls}>
               {t}
             </ToggleGroupItem>
@@ -283,7 +286,7 @@ export function PriceChart({ addr, tf, type, candles, flags, error, dark, loadin
         onPointerCancel={onUp}
         onPointerLeave={(e) => e.pointerType === 'mouse' && !drag.current && setHover(-1)}
       >
-        <canvas ref={canvasRef} role="img" aria-label={`Chart harga dan volume ${POOLS[addr]}, geser untuk melihat riwayat`} className="block h-full w-full" />
+        <canvas ref={canvasRef} role="img" aria-label={`Chart harga dan volume ${name}, geser untuk melihat riwayat`} className="block h-full w-full" />
         {!n && (
           <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
             {error || <span className="h-full w-full animate-pulse rounded-lg bg-muted/60" />}

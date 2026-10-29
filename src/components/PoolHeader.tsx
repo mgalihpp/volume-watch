@@ -1,10 +1,9 @@
-import { poolName } from '@/components/PoolList'
 import { PoolSheet } from '@/components/PoolSheet'
 import { Price } from '@/components/Price'
 import { Meter } from '@/components/SpikeMeter'
 import { TokenPair } from '@/components/TokenPair'
 import type { PoolRow } from '@/hooks/usePoolMonitor'
-import { TF_SEC, usdShort, type Candle, type Rule, type Timeframe } from '@/lib/meteora'
+import { TF_SEC, splitName, usdShort, type Candle, type PoolInfo, type Rule, type Timeframe } from '@/lib/meteora'
 import { cn } from '@/lib/utils'
 
 function spanLabel(sec: number) {
@@ -14,16 +13,19 @@ function spanLabel(sec: number) {
 
 interface Props {
   addr: string
+  pools: Record<string, PoolInfo>
   rows: Record<string, PoolRow>
   rule: Rule
   candles: Candle[]
   tf: Timeframe
   onPick: (addr: string) => void
+  onManage?: () => void
 }
 
-export function PoolHeader({ addr, rows, rule, candles, tf, onPick }: Props) {
+export function PoolHeader({ addr, pools, rows, rule, candles, tf, onPick, onManage }: Props) {
   const row = rows[addr]
-  const { pair, bin } = poolName(addr)
+  const pool = pools[addr]
+  const { pair, bin } = splitName(pool.name)
   const since = Date.now() / 1000 - 86400
   const first = candles.find((c) => c.timestamp + TF_SEC[tf] > since)
   const span = first ? Date.now() / 1000 - first.timestamp : 0
@@ -35,11 +37,11 @@ export function PoolHeader({ addr, rows, rule, candles, tf, onPick }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <span className="flex">
-          <PoolSheet rows={rows} rule={rule} picked={addr} onPick={onPick}>
-            <TokenPair pair={pair} size="lg" />
-            <span className="font-semibold text-foreground">{pair}</span>
-            <span className="rounded-md bg-muted px-1.5 py-px text-[11px] font-medium text-muted-foreground">{bin}</span>
+        <span className="flex min-w-0">
+          <PoolSheet pools={pools} rows={rows} rule={rule} picked={addr} onPick={onPick} onManage={onManage}>
+            <TokenPair x={pool.x} y={pool.y} size="lg" />
+            <span className="truncate font-semibold text-foreground">{pair}</span>
+            <span className="shrink-0 rounded-md bg-muted px-1.5 py-px text-[11px] font-medium text-muted-foreground">{bin}</span>
           </PoolSheet>
         </span>
         <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1 tabular-nums">
