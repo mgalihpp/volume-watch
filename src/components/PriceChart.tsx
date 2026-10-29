@@ -189,6 +189,18 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
       g.fillStyle = dark ? '#07090d' : '#fff'; g.textAlign = 'left'; g.fillText(fmtPrice(last.close), pw + 8, ly + 4)
     }
 
+    if (start + vis.length >= n) {
+      const ex = Math.min(off + vis.length * slot, pw)
+      const end = new Date((last.timestamp + TF_SEC[tf]) * 1000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      g.strokeStyle = C.soft; g.lineWidth = 1; g.setLineDash([2, 3])
+      g.beginPath(); g.moveTo(ex + 0.5, padT); g.lineTo(ex + 0.5, vTop + volH); g.stroke(); g.setLineDash([])
+      const label = `Berakhir ${end}`
+      const tw = g.measureText(label).width + 14
+      const lx = Math.min(Math.max(ex - tw / 2, 0), pw - tw)
+      g.fillStyle = C.amberStrong; g.beginPath(); g.roundRect(lx, size.h - 19, tw, 17, 8); g.fill()
+      g.fillStyle = dark ? '#07090d' : '#fff'; g.textAlign = 'center'; g.fillText(label, lx + tw / 2, size.h - 7)
+    }
+
     if (hover >= 0 && hover < vis.length) {
       const hx = Math.round(X(hover)) + 0.5
       g.strokeStyle = C.soft; g.setLineDash([2, 3])
@@ -202,7 +214,7 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
     const i = Math.floor((x - (count - vis.length) * layout.slot) / (layout.slot || 1))
     if (x > layout.pw || i < 0 || i >= vis.length) return setHover(-1)
     setHover(i)
-    setTip(x > rect.width / 2 ? Math.max(x - 186, 4) : x + 14)
+    setTip(x > rect.width / 2 ? Math.max(x - 214, 4) : x + 14)
   }
 
   const onDown = (e: React.PointerEvent) => {
@@ -311,12 +323,15 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
         )}
         {hc && (
           <div
-            className="pointer-events-none absolute top-2 z-10 grid min-w-[172px] grid-cols-[auto_1fr] gap-x-4 gap-y-0.5 rounded-lg border bg-popover px-3 py-2.5 text-xs tabular-nums shadow-lg"
+            className="pointer-events-none absolute top-2 z-10 grid min-w-[200px] grid-cols-[auto_1fr] gap-x-4 gap-y-0.5 rounded-lg border bg-popover px-3 py-2.5 text-xs tabular-nums shadow-lg"
             style={{ left: tip }}
           >
             <span className="col-span-2 mb-1 font-medium">
               {new Date(hc.timestamp * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              <span className="font-normal text-muted-foreground"> mulai</span>
             </span>
+            <span className="text-muted-foreground">Berakhir</span>
+            <span className="text-right">{new Date((hc.timestamp + TF_SEC[tf]) * 1000).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
             <span className="text-muted-foreground">Buka</span><span className="text-right">{fmtPrice(hc.open)}</span>
             <span className="text-muted-foreground">Tertinggi</span><span className="text-right">{fmtPrice(hc.high)}</span>
             <span className="text-muted-foreground">Terendah</span><span className="text-right">{fmtPrice(hc.low)}</span>
