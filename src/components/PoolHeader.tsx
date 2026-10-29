@@ -35,9 +35,7 @@ export function PoolHeader({ addr, pools, rows, rule, candles, tf }: Props) {
     <div className="flex flex-col border-b lg:flex-row lg:items-center lg:gap-8 lg:px-6 lg:py-4">
       <div className="flex min-w-0 flex-col gap-1.5 px-4 pt-4 pb-3.5 lg:gap-2 lg:p-0">
         <span className="flex min-w-0 items-center gap-2.5">
-          <span className="hidden lg:block">
-            <TokenPair x={pool.x} y={pool.y} size="lg" />
-          </span>
+          <TokenPair x={pool.x} y={pool.y} size="lg" />
           <span className="truncate text-base font-bold lg:text-xl">{pair}</span>
           <span className="shrink-0 text-xs font-medium text-muted-foreground">{bin}</span>
           {row?.isSpike && (

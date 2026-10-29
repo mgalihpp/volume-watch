@@ -70,6 +70,7 @@ export function PoolTabs({ pools, rows, picked, onPick }: Props) {
               on ? 'border-up font-bold text-foreground' : 'border-transparent font-medium text-muted-foreground',
             )}
           >
+            <TokenPair x={pool.x} y={pool.y} />
             {pair}
             <span className="text-[11px] font-normal text-muted-foreground">{bin.replace('bin ', '')}</span>
             {rows[addr]?.isSpike && <span className="size-1.5 rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
