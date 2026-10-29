@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { AlertEntry } from '@/hooks/usePoolMonitor'
 import type { Rule } from '@/lib/meteora'
 
@@ -24,6 +24,7 @@ function alertTime(t: number) {
 /** Data dari bot Telegram di VPS (data/alerts.json). null kalau website dibuka tanpa bot, misalnya di GitHub Pages. */
 export function useBotData() {
   const [data, setData] = useState<BotData | null>(null)
+  const [tick, setTick] = useState(0)
   useEffect(() => {
     let cancelled = false
     const load = () =>
@@ -49,6 +50,19 @@ export function useBotData() {
       cancelled = true
       clearInterval(id)
     }
-  }, [])
-  return data
+  }, [tick])
+  const reload = useCallback(() => setTick((t) => t + 1), [])
+  return { bot: data, reload }
+}
+
+/** Simpan aturan ke bot VPS; bot langsung memakainya tanpa restart. */
+export async function saveBotRule(rule: Rule, pin: string): Promise<void> {
+  const r = await fetch('./api/rule', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Token': pin },
+    body: JSON.stringify(rule),
+  })
+  if (r.ok) return
+  const j = (await r.json().catch(() => null)) as { error?: string } | null
+  throw new Error(j?.error ?? `Gagal menyimpan (HTTP ${r.status})`)
 }

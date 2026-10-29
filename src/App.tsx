@@ -18,7 +18,7 @@ const DEFAULT_CHART = { addr: POOL_ADDRESSES[2], tf: '1h' as Timeframe, type: 'c
 export default function App() {
   const { dark, setMode } = useDark()
   const [localRule, setRule] = useStored<Rule>('rule', DEFAULT_RULE)
-  const bot = useBotData()
+  const { bot, reload: reloadBot } = useBotData()
   const rule = bot?.rule ?? localRule // di VPS aturan mengikuti bot Telegram
   const [saved, setChart] = useStored('chart', DEFAULT_CHART)
   const chart = {
@@ -52,7 +52,7 @@ export default function App() {
           </span>
           <ThemeToggle dark={dark} setMode={setMode} />
           <AlertMenu alerts={bot ? bot.alerts : alerts} botUpdated={bot?.updated} />
-          <RuleSheet rule={rule} onSave={setRule} locked={!!bot} />
+          <RuleSheet rule={rule} onSave={setRule} bot={bot ? { onSaved: reloadBot } : undefined} />
         </div>
       </header>
 
