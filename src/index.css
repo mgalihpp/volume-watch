@@ -1,0 +1,86 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/schibsted-grotesk";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-sans: 'Schibsted Grotesk Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-heading: var(--font-sans);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --color-mark: var(--mark);
+    --color-up: var(--up);
+    --color-down: var(--down);
+    --color-trace: var(--trace);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Paper-and-ink palette: a strip-chart recorder, not a SaaS dashboard */
+:root {
+    --background: #e8ede6;
+    --foreground: #1b2a38;
+    --card: #e8ede6;
+    --card-foreground: #1b2a38;
+    --popover: #e8ede6;
+    --popover-foreground: #1b2a38;
+    --primary: #1b2a38;
+    --primary-foreground: #e8ede6;
+    --secondary: #dae2d7;
+    --secondary-foreground: #1b2a38;
+    --muted: #dae2d7;
+    --muted-foreground: #55646f;
+    --accent: #f5cf45;
+    --accent-foreground: #1b2a38;
+    --destructive: #b4452f;
+    --border: rgba(27, 42, 56, 0.16);
+    --input: #1b2a38;
+    --ring: #2c5c8f;
+    --radius: 0rem;
+    --mark: #f5cf45;
+    --up: #1f7a5c;
+    --down: #b4452f;
+    --trace: #2c5c8f;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-size: 15px;
+    line-height: 1.55;
+    background-image:
+      linear-gradient(rgba(27, 42, 56, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(27, 42, 56, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
