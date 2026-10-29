@@ -44,6 +44,7 @@ interface Props {
 
 export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, error, dark, loadingOlder, onNeedOlder, onChange }: Props) {
   const [hover, setHover] = useState(-1)
+  const [now, setNow] = useState(() => Date.now())
   const [size, setSize] = useState({ w: 0, h: 0 })
   // Jendela tampilan: `right` = jumlah candle tersembunyi di kanan (0 berarti mengikuti candle terbaru)
   const [view, setView] = useState({ right: 0, count: DEFAULT_COUNT })
@@ -54,6 +55,11 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
   const pinch = useRef<{ dist: number; count: number } | null>(null)
 
   useEffect(() => setView({ right: 0, count: DEFAULT_COUNT }), [addr, tf])
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
 
   useEffect(() => {
     const el = boxRef.current
@@ -194,7 +200,9 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
       const end = new Date((last.timestamp + TF_SEC[tf]) * 1000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
       g.strokeStyle = C.soft; g.lineWidth = 1; g.setLineDash([2, 3])
       g.beginPath(); g.moveTo(ex + 0.5, padT); g.lineTo(ex + 0.5, vTop + volH); g.stroke(); g.setLineDash([])
-      const label = `Berakhir ${end}`
+      const left = Math.max(Math.round(last.timestamp + TF_SEC[tf] - now / 1000), 0)
+      const [h, m, sec] = [Math.floor(left / 3600), Math.floor((left % 3600) / 60), left % 60].map((v) => String(v).padStart(2, '0'))
+      const label = `${end} · ${left >= 3600 ? `${h}:${m}:${sec}` : `${m}:${sec}`}`
       const tw = g.measureText(label).width + 14
       const lx = Math.min(Math.max(ex - tw / 2, 0), pw - tw)
       g.fillStyle = C.amberStrong; g.beginPath(); g.roundRect(lx, size.h - 19, tw, 17, 8); g.fill()
@@ -206,7 +214,7 @@ export function PriceChart({ addr, name, tf, timeframes, type, candles, flags, e
       g.strokeStyle = C.soft; g.setLineDash([2, 3])
       g.beginPath(); g.moveTo(hx, padT); g.lineTo(hx, vTop + volH); g.stroke(); g.setLineDash([])
     }
-  }, [vis, vflags, candles, n, count, layout, size, type, tf, hover, dark])
+  }, [vis, vflags, candles, n, count, layout, size, type, tf, hover, dark, now, start])
 
   const [tip, setTip] = useState(0)
   const hoverAt = (clientX: number, rect: DOMRect) => {
