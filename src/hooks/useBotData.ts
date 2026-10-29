@@ -56,10 +56,10 @@ export function useBotData() {
 }
 
 /** Simpan aturan ke bot VPS; bot langsung memakainya tanpa restart. */
-export async function saveBotRule(rule: Rule, pin: string): Promise<void> {
+export async function saveBotRule(rule: Rule): Promise<void> {
   const r = await fetch('./api/rule', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Token': pin },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(rule),
   })
   if (r.ok) return

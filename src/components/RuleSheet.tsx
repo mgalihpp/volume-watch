@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { saveBotRule } from '@/hooks/useBotData'
-import { useStored } from '@/hooks/useStored'
 import type { Rule } from '@/lib/meteora'
 
 const FIELDS: { key: keyof Rule; label: string; unit: string; min: number; step: number }[] = [
@@ -24,7 +23,7 @@ const inputCls =
 interface Props {
   rule: Rule
   onSave: (rule: Rule) => void
-  /** Ada berarti aturan disimpan ke bot Telegram di VPS (butuh PIN), bukan hanya di browser ini. */
+  /** Ada berarti aturan disimpan ke bot Telegram di VPS, bukan hanya di browser ini. */
   bot?: { onSaved: () => void }
 }
 
@@ -32,14 +31,13 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<Record<keyof Rule, string>>(() => toDraft(rule))
   const [perm, setPerm] = useState(() => ('Notification' in window ? Notification.permission : 'denied'))
-  const [{ pin }, setPin] = useStored('bot-pin', { pin: '' })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   const valid = FIELDS.every((f) => {
     const v = parseFloat(draft[f.key])
     return Number.isFinite(v) && v >= f.min
-  }) && (!bot || pin.trim() !== '')
+  })
 
   const save = async () => {
     const next = { mult: parseFloat(draft.mult), baseline: Math.round(parseFloat(draft.baseline)), minUsd: parseFloat(draft.minUsd), interval: Math.round(parseFloat(draft.interval)) }
@@ -50,7 +48,7 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
     setSaving(true)
     setError('')
     try {
-      await saveBotRule(next, pin.trim())
+      await saveBotRule(next)
       bot.onSaved()
       setOpen(false)
     } catch (e) {
@@ -122,24 +120,6 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
         </div>
 
         <div className="mt-auto flex flex-col gap-3">
-          {bot && (
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <Label htmlFor="rule-pin" className="text-sm font-medium">PIN bot</Label>
-                <p className="text-xs text-muted-foreground">Diingat di browser ini</p>
-              </div>
-              <Input
-                id="rule-pin"
-                type="password"
-                inputMode="numeric"
-                autoComplete="off"
-                value={pin}
-                onChange={(e) => setPin({ pin: e.target.value })}
-                aria-invalid={!!error}
-                className="h-9 w-[150px] rounded-lg text-right font-medium tracking-widest"
-              />
-            </div>
-          )}
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button onClick={save} disabled={!valid || saving} className="h-10 w-full">
             {saving && <LoaderCircleIcon className="animate-spin" />}
