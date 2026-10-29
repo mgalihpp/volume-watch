@@ -52,7 +52,7 @@ export function PoolList({ pools, rows, rule, picked, onPick }: Props & { rule: 
 /** Versi layar kecil: chip horizontal yang bisa digeser. */
 export function PoolChips({ pools, rows, picked, onPick }: Props) {
   return (
-    <div role="tablist" aria-label="Pool" className="flex gap-2">
+    <div role="tablist" aria-label="Pool" className="flex shrink-0 gap-2">
       {Object.entries(pools).map(([addr, pool]) => {
         const on = picked === addr
         return (
