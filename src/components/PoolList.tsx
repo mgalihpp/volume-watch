@@ -28,14 +28,14 @@ export function PoolList({ pools, rows, rule, picked, onPick }: Props & { rule: 
             onClick={() => onPick(addr)}
             className={cn(
               'flex min-w-0 flex-col gap-3 rounded-[20px] border p-4 text-left transition-all outline-none focus-visible:ring-3 focus-visible:ring-ring/40',
-              on ? 'border-up/40 bg-up/[0.06] shadow-[0_0_28px_-8px_var(--up)]' : 'bg-card hover:border-foreground/20',
+              on ? 'border-up/50 bg-up/[0.06]' : 'bg-card hover:border-foreground/20',
             )}
           >
             <span className="flex items-center gap-2.5">
               <TokenPair x={pool.x} y={pool.y} />
               <span className="truncate font-bold">{pair}</span>
               <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">{bin}</span>
-              {r?.isSpike && <span className="ml-auto size-2 shrink-0 animate-pulse rounded-full bg-amber-strong shadow-[0_0_8px_var(--amber-strong)]" aria-label="Sedang lonjakan" />}
+              {r?.isSpike && <span className="ml-auto size-2 shrink-0 animate-pulse rounded-full bg-amber-strong" aria-label="Sedang lonjakan" />}
             </span>
             <span className="flex items-baseline justify-between gap-2 tabular-nums">
               <span className="text-[17px] font-semibold">{r ? <Price value={r.price} /> : '–'}</span>

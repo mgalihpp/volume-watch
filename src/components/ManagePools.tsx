@@ -4,6 +4,7 @@ import { TokenPair } from '@/components/TokenPair'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useMobile } from '@/hooks/useMobile'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { addBotPool, removeBotPool } from '@/hooks/useBotData'
 import { splitName, type PoolInfo } from '@/lib/meteora'
@@ -17,6 +18,7 @@ interface Props {
 
 /** Tambah/hapus pool yang dipantau bot (dan website). */
 export function ManagePools({ open, onOpenChange, pools, onChanged }: Props) {
+  const mobile = useMobile()
   const [address, setAddress] = useState('')
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
@@ -51,7 +53,7 @@ export function ManagePools({ open, onOpenChange, pools, onChanged }: Props) {
         onOpenChange(o)
       }}
     >
-      <SheetContent className="w-full gap-6 p-5 sm:max-w-[420px] sm:p-6">
+      <SheetContent side={mobile ? 'bottom' : 'right'} className="max-h-[92dvh] w-full gap-6 overflow-y-auto rounded-t-[28px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:max-h-none sm:rounded-none sm:max-w-[420px] sm:p-6">
         <SheetHeader className="p-0">
           <SheetTitle className="text-lg font-semibold">Kelola pool</SheetTitle>
           <SheetDescription>Pool Meteora DLMM yang dipantau website dan bot Telegram.</SheetDescription>

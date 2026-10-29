@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { saveBotRule } from '@/hooks/useBotData'
+import { useMobile } from '@/hooks/useMobile'
 import type { Rule } from '@/lib/meteora'
 
 const FIELDS: { key: keyof Rule; label: string; unit: string; min: number; step: number }[] = [
@@ -28,6 +29,7 @@ interface Props {
 }
 
 export function RuleSheet({ rule, onSave, bot }: Props) {
+  const mobile = useMobile()
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<Record<keyof Rule, string>>(() => toDraft(rule))
   const [perm, setPerm] = useState(() => ('Notification' in window ? Notification.permission : 'denied'))
@@ -77,7 +79,7 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
         <SlidersHorizontalIcon />
         <span className="hidden sm:inline">Aturan alert</span>
       </SheetTrigger>
-      <SheetContent className="gap-7 p-7 sm:max-w-[420px]">
+      <SheetContent side={mobile ? 'bottom' : 'right'} className="max-h-[92dvh] gap-5 overflow-y-auto rounded-t-[28px] p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:max-h-none sm:gap-7 sm:rounded-none sm:p-7 sm:max-w-[420px]">
         <SheetHeader className="p-0">
           <SheetTitle className="text-2xl font-bold tracking-tight">Aturan alert</SheetTitle>
           <SheetDescription>
@@ -103,7 +105,7 @@ export function RuleSheet({ rule, onSave, bot }: Props) {
                   value={draft[f.key]}
                   onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
                   aria-invalid={!(parseFloat(draft[f.key]) >= f.min)}
-                  className={`${inputCls} pr-14`}
+                  className={`${inputCls} ${f.key === 'minUsd' ? 'pr-[4.75rem]' : 'pr-14'}`}
                 />
                 <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">{f.key === 'minUsd' ? 'USD/mnt' : f.unit}</span>
               </div>
