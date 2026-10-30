@@ -96,10 +96,10 @@ const compact = (n: number) => new Intl.NumberFormat('en-US', { notation: 'compa
 
 function Info({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="flex w-[118px] shrink-0 flex-col gap-1 px-4 py-2.5 lg:w-auto lg:min-w-0 lg:px-6">
-      <dt className="truncate text-[9px] font-semibold tracking-[0.12em] text-muted-foreground uppercase lg:text-[10px]">{label}</dt>
-      <dd className="truncate text-[15px] leading-none font-bold tabular-nums lg:text-base">{value}</dd>
-      {sub && <span className="truncate text-[10px] text-muted-foreground tabular-nums">{sub}</span>}
+    <div className="flex min-w-[104px] shrink-0 flex-col gap-1 px-4 py-2.5 whitespace-nowrap lg:min-w-0 lg:px-6">
+      <dt className="text-[9px] font-semibold tracking-[0.12em] text-muted-foreground uppercase lg:text-[10px]">{label}</dt>
+      <dd className="text-[15px] leading-none font-bold tabular-nums lg:text-base">{value}</dd>
+      {sub && <span className="text-[10px] text-muted-foreground tabular-nums">{sub}</span>}
     </div>
   )
 }
