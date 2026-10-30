@@ -87,6 +87,60 @@ export async function fetchPools(): Promise<Snapshot[]> {
   return out
 }
 
+export interface PoolDetail {
+  binStep: number
+  baseFee: number
+  dynamicFee: number
+  protocolFee: number
+  tvl: number
+  vol24: number
+  fees24: number
+  /** fee 24 jam dibagi TVL, sudah dalam persen */
+  feeTvl24: number
+  /** imbal hasil harian dalam persen (sama dengan feeTvl24) */
+  apr: number
+  x: { symbol: string; amount: number; price: number }
+  y: { symbol: string; amount: number; price: number }
+  createdAt: number
+}
+
+interface RawToken {
+  symbol: string
+  price?: number | string | null
+}
+interface RawDetail {
+  token_x: RawToken
+  token_y: RawToken
+  token_x_amount: number | string
+  token_y_amount: number | string
+  created_at?: number
+  pool_config: { bin_step: number; base_fee_pct: number; protocol_fee_pct: number }
+  dynamic_fee_pct?: number | string | null
+  tvl: number | string
+  apr?: number | string | null
+  volume: Record<string, number | string>
+  fees: Record<string, number | string>
+  fee_tvl_ratio: Record<string, number | string>
+}
+
+export async function fetchPoolDetail(address: string): Promise<PoolDetail> {
+  const p = await getJSON<RawDetail>(`${API}/pools/${address}`)
+  return {
+    binStep: p.pool_config.bin_step,
+    baseFee: p.pool_config.base_fee_pct,
+    dynamicFee: Number(p.dynamic_fee_pct ?? 0),
+    protocolFee: p.pool_config.protocol_fee_pct,
+    tvl: Number(p.tvl),
+    vol24: Number(p.volume['24h']),
+    fees24: Number(p.fees['24h']),
+    feeTvl24: Number(p.fee_tvl_ratio['24h']),
+    apr: Number(p.apr ?? 0),
+    x: { symbol: p.token_x.symbol, amount: Number(p.token_x_amount), price: Number(p.token_x.price ?? 0) },
+    y: { symbol: p.token_y.symbol, amount: Number(p.token_y_amount), price: Number(p.token_y.price ?? 0) },
+    createdAt: p.created_at ?? 0,
+  }
+}
+
 export async function fetchCandles(address: string, tf: Timeframe, end = Math.floor(Date.now() / 1000), count = 96): Promise<Candle[]> {
   if (tf === '1m') return fetchBotMinutes(address)
   // API menolak rentang 100 candle atau lebih per request

@@ -1,6 +1,7 @@
 import { Price } from '@/components/Price'
 import { Meter } from '@/components/SpikeMeter'
 import { TokenPair } from '@/components/TokenPair'
+import { usePoolDetail } from '@/hooks/usePoolDetail'
 import type { PoolRow } from '@/hooks/usePoolMonitor'
 import { TF_SEC, splitName, usdShort, type Candle, type PoolInfo, type Rule, type Timeframe } from '@/lib/meteora'
 import { cn } from '@/lib/utils'
@@ -21,6 +22,7 @@ interface Props {
 
 export function PoolHeader({ addr, pools, rows, rule, candles, tf }: Props) {
   const row = rows[addr]
+  const detail = usePoolDetail(addr)
   const pool = pools[addr]
   const { pair, bin } = splitName(pool.name)
   const since = Date.now() / 1000 - 86400
@@ -65,8 +67,33 @@ export function PoolHeader({ addr, pools, rows, rule, candles, tf }: Props) {
           progress={ratio == null ? null : ratio / rule.mult}
           hot={row?.isSpike}
         />
-        <Stat label="TVL" value={row ? usdShort(row.tvl) : '–'} />
+        <Stat label="TVL" value={row ? usdShort(row.tvl) : detail ? usdShort(detail.tvl) : '–'} />
       </dl>
+
+      <dl className="grid grid-cols-3 divide-x border-t lg:basis-full lg:grid-cols-6 lg:divide-x-0 lg:border-t">
+        <Info label="Bin step" value={detail ? `${detail.binStep}` : '–'} />
+        <Info label="Fee dasar" value={detail ? `${detail.baseFee}%` : '–'} sub={detail ? `dinamis ${+detail.dynamicFee.toFixed(4)}%` : undefined} />
+        <Info label="Volume 24j" value={detail ? usdShort(detail.vol24) : '–'} />
+        <Info label="Fee 24j" value={detail ? usdShort(detail.fees24) : '–'} sub={detail ? `${detail.feeTvl24.toFixed(2)}% dari TVL` : undefined} />
+        <Info label="APR" value={detail ? `${Math.round(detail.apr * 365)}%` : '–'} sub="fee 24j × 365" />
+        <Info
+          label="Isi pool"
+          value={detail ? `${compact(detail.x.amount)} ${detail.x.symbol}` : '–'}
+          sub={detail ? `${compact(detail.y.amount)} ${detail.y.symbol}` : undefined}
+        />
+      </dl>
+    </div>
+  )
+}
+
+const compact = (n: number) => new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(n)
+
+function Info({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1 px-4 py-2.5 lg:px-6 lg:first:pl-6">
+      <dt className="truncate text-[9px] font-semibold tracking-[0.12em] text-muted-foreground uppercase lg:text-[10px]">{label}</dt>
+      <dd className="truncate text-[15px] leading-none font-bold tabular-nums lg:text-base">{value}</dd>
+      {sub && <span className="truncate text-[10px] text-muted-foreground tabular-nums">{sub}</span>}
     </div>
   )
 }
