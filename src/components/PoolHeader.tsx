@@ -72,7 +72,8 @@ export function PoolHeader({ addr, pools, rows, rule, candles, tf }: Props) {
         </dl>
       </div>
 
-      <dl className="grid grid-cols-3 divide-x border-t lg:grid-cols-6">
+      {/* HP: satu baris yang digeser ke samping; desktop: dua baris enam kolom */}
+      <dl className="flex divide-x overflow-x-auto border-t [scrollbar-width:none] lg:grid lg:grid-cols-6 lg:[&>:nth-child(n+7)]:border-t">
         <Info label="Bin step" value={detail ? `${detail.binStep}` : '–'} />
         <Info label="Fee dasar" value={detail ? `${detail.baseFee}%` : '–'} sub={detail ? `dinamis ${+detail.dynamicFee.toFixed(4)}%` : undefined} />
         <Info label="Fee/TVL 24j" value={detail ? `${detail.feeTvl24.toFixed(2)}%` : '–'} sub={detail ? `fee ${usdShort(detail.fees24)}` : undefined} />
@@ -83,9 +84,6 @@ export function PoolHeader({ addr, pools, rows, rule, candles, tf }: Props) {
           sub={detail ? `${compact(detail.y.amount)} ${detail.y.symbol}` : undefined}
         />
         <Info label="Dibuat" value={detail?.createdAt ? new Date(detail.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '–'} />
-      </dl>
-
-      <dl className="grid grid-cols-3 divide-x border-t lg:grid-cols-6">
         {(detail?.windows ?? ['30m', '1h', '2h', '4h', '12h', '24h'].map((label) => ({ label, volume: NaN, fees: NaN }))).map((w) => (
           <Info key={w.label} label={`Volume ${w.label}`} value={Number.isNaN(w.volume) ? '–' : usdShort(w.volume)} sub={Number.isNaN(w.fees) ? undefined : `fee ${usdShort(w.fees)}`} />
         ))}
@@ -98,7 +96,7 @@ const compact = (n: number) => new Intl.NumberFormat('en-US', { notation: 'compa
 
 function Info({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 px-4 py-2.5 lg:px-6">
+    <div className="flex w-[118px] shrink-0 flex-col gap-1 px-4 py-2.5 lg:w-auto lg:min-w-0 lg:px-6">
       <dt className="truncate text-[9px] font-semibold tracking-[0.12em] text-muted-foreground uppercase lg:text-[10px]">{label}</dt>
       <dd className="truncate text-[15px] leading-none font-bold tabular-nums lg:text-base">{value}</dd>
       {sub && <span className="truncate text-[10px] text-muted-foreground tabular-nums">{sub}</span>}
