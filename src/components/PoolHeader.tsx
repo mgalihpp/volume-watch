@@ -82,6 +82,12 @@ export function PoolHeader({ addr, pools, rows, rule, candles, tf }: Props) {
           sub={detail ? `${compact(detail.y.amount)} ${detail.y.symbol}` : undefined}
         />
       </dl>
+
+      <dl className="grid grid-cols-3 divide-x border-t lg:basis-full lg:grid-cols-6 lg:divide-x-0">
+        {(detail?.windows ?? ['30m', '1h', '2h', '4h', '12h', '24h'].map((label) => ({ label, volume: NaN, fees: NaN }))).map((w) => (
+          <Info key={w.label} label={`Volume ${w.label}`} value={Number.isNaN(w.volume) ? '–' : usdShort(w.volume)} sub={Number.isNaN(w.fees) ? undefined : `fee ${usdShort(w.fees)}`} />
+        ))}
+      </dl>
     </div>
   )
 }
