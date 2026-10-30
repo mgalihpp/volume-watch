@@ -34,56 +34,58 @@ export function PoolHeader({ addr, pools, rows, rule, candles, tf }: Props) {
   const vol1m = row?.vol1m ?? null
 
   return (
-    <div className="flex flex-col border-b lg:flex-row lg:items-center lg:gap-8 lg:px-6 lg:py-4">
-      <div className="flex min-w-0 flex-col gap-1.5 px-4 pt-4 pb-3.5 lg:gap-2 lg:p-0">
-        <span className="flex min-w-0 items-center gap-2.5">
-          <TokenPair x={pool.x} y={pool.y} size="lg" />
-          <span className="truncate text-base font-bold lg:text-xl">{pair}</span>
-          <span className="shrink-0 text-xs font-medium text-muted-foreground">{bin}</span>
-          {row?.isSpike && (
-            <span className="flex shrink-0 items-center gap-1.5 rounded-[4px] bg-amber-strong/15 px-2 py-0.5 text-[9px] font-bold tracking-wider text-amber-strong uppercase lg:text-[10px]">
-              <span className="size-1.5 animate-pulse rounded-full bg-amber-strong" />
-              Lonjakan
-            </span>
-          )}
-        </span>
-        <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1 tabular-nums">
-          <span className="text-[34px] leading-none font-bold tracking-tighter lg:text-[32px]">{price ? <Price value={price} /> : '–'}</span>
-          {chg != null && (
-            <span className={cn('text-[13px] font-semibold whitespace-nowrap', chg >= 0 ? 'text-up' : 'text-down')}>
-              {chg >= 0 ? '+' : ''}
-              {chg.toFixed(2)}%<span className="ml-1.5 font-normal text-muted-foreground">{spanLabel(Math.min(span, 86400))}</span>
-            </span>
-          )}
-        </span>
+    <div className="flex flex-col border-b">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:gap-8 lg:px-6 lg:py-4">
+        <div className="flex min-w-0 flex-col gap-1.5 px-4 pt-4 pb-3.5 lg:gap-2 lg:p-0">
+          <span className="flex min-w-0 items-center gap-2.5">
+            <TokenPair x={pool.x} y={pool.y} size="lg" />
+            <span className="truncate text-base font-bold lg:text-xl">{pair}</span>
+            <span className="shrink-0 text-xs font-medium text-muted-foreground">{bin}</span>
+            {row?.isSpike && (
+              <span className="flex shrink-0 items-center gap-1.5 rounded-[4px] bg-amber-strong/15 px-2 py-0.5 text-[9px] font-bold tracking-wider text-amber-strong uppercase lg:text-[10px]">
+                <span className="size-1.5 animate-pulse rounded-full bg-amber-strong" />
+                Lonjakan
+              </span>
+            )}
+          </span>
+          <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1 tabular-nums">
+            <span className="text-[34px] leading-none font-bold tracking-tighter lg:text-[32px]">{price ? <Price value={price} /> : '–'}</span>
+            {chg != null && (
+              <span className={cn('text-[13px] font-semibold whitespace-nowrap', chg >= 0 ? 'text-up' : 'text-down')}>
+                {chg >= 0 ? '+' : ''}
+                {chg.toFixed(2)}%<span className="ml-1.5 font-normal text-muted-foreground">{spanLabel(Math.min(span, 86400))}</span>
+              </span>
+            )}
+          </span>
+        </div>
+
+        <dl className="grid grid-cols-3 divide-x border-t lg:flex lg:divide-x-0 lg:border-t-0">
+          <Stat label="Volume 1m" value={vol1m == null ? '–' : usdShort(vol1m)} goal={`batas ${usdShort(rule.minUsd)}`} progress={vol1m == null ? null : vol1m / rule.minUsd} hot={row?.isSpike} />
+          <Stat
+            label="Vs normal"
+            value={ratio == null ? '–' : Number.isFinite(ratio) ? `${ratio.toFixed(1)}×` : 'dari nol'}
+            goal={`batas ${rule.mult}×`}
+            progress={ratio == null ? null : ratio / rule.mult}
+            hot={row?.isSpike}
+          />
+          <Stat label="TVL" value={row ? usdShort(row.tvl) : detail ? usdShort(detail.tvl) : '–'} />
+        </dl>
       </div>
 
-      <dl className="grid grid-cols-3 divide-x border-t lg:flex lg:divide-x-0 lg:border-t-0">
-        <Stat label="Volume 1m" value={vol1m == null ? '–' : usdShort(vol1m)} goal={`batas ${usdShort(rule.minUsd)}`} progress={vol1m == null ? null : vol1m / rule.minUsd} hot={row?.isSpike} />
-        <Stat
-          label="Vs normal"
-          value={ratio == null ? '–' : Number.isFinite(ratio) ? `${ratio.toFixed(1)}×` : 'dari nol'}
-          goal={`batas ${rule.mult}×`}
-          progress={ratio == null ? null : ratio / rule.mult}
-          hot={row?.isSpike}
-        />
-        <Stat label="TVL" value={row ? usdShort(row.tvl) : detail ? usdShort(detail.tvl) : '–'} />
-      </dl>
-
-      <dl className="grid grid-cols-3 divide-x border-t lg:basis-full lg:grid-cols-6 lg:divide-x-0 lg:border-t">
+      <dl className="grid grid-cols-3 divide-x border-t lg:grid-cols-6">
         <Info label="Bin step" value={detail ? `${detail.binStep}` : '–'} />
         <Info label="Fee dasar" value={detail ? `${detail.baseFee}%` : '–'} sub={detail ? `dinamis ${+detail.dynamicFee.toFixed(4)}%` : undefined} />
-        <Info label="Volume 24j" value={detail ? usdShort(detail.vol24) : '–'} />
-        <Info label="Fee 24j" value={detail ? usdShort(detail.fees24) : '–'} sub={detail ? `${detail.feeTvl24.toFixed(2)}% dari TVL` : undefined} />
+        <Info label="Fee/TVL 24j" value={detail ? `${detail.feeTvl24.toFixed(2)}%` : '–'} sub={detail ? `fee ${usdShort(detail.fees24)}` : undefined} />
         <Info label="APR" value={detail ? `${Math.round(detail.apr * 365)}%` : '–'} sub="fee 24j × 365" />
         <Info
           label="Isi pool"
           value={detail ? `${compact(detail.x.amount)} ${detail.x.symbol}` : '–'}
           sub={detail ? `${compact(detail.y.amount)} ${detail.y.symbol}` : undefined}
         />
+        <Info label="Dibuat" value={detail?.createdAt ? new Date(detail.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '–'} />
       </dl>
 
-      <dl className="grid grid-cols-3 divide-x border-t lg:basis-full lg:grid-cols-6 lg:divide-x-0">
+      <dl className="grid grid-cols-3 divide-x border-t lg:grid-cols-6">
         {(detail?.windows ?? ['30m', '1h', '2h', '4h', '12h', '24h'].map((label) => ({ label, volume: NaN, fees: NaN }))).map((w) => (
           <Info key={w.label} label={`Volume ${w.label}`} value={Number.isNaN(w.volume) ? '–' : usdShort(w.volume)} sub={Number.isNaN(w.fees) ? undefined : `fee ${usdShort(w.fees)}`} />
         ))}
@@ -96,7 +98,7 @@ const compact = (n: number) => new Intl.NumberFormat('en-US', { notation: 'compa
 
 function Info({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 px-4 py-2.5 lg:px-6 lg:first:pl-6">
+    <div className="flex min-w-0 flex-col gap-1 px-4 py-2.5 lg:px-6">
       <dt className="truncate text-[9px] font-semibold tracking-[0.12em] text-muted-foreground uppercase lg:text-[10px]">{label}</dt>
       <dd className="truncate text-[15px] leading-none font-bold tabular-nums lg:text-base">{value}</dd>
       {sub && <span className="truncate text-[10px] text-muted-foreground tabular-nums">{sub}</span>}

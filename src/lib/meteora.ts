@@ -93,7 +93,6 @@ export interface PoolDetail {
   dynamicFee: number
   protocolFee: number
   tvl: number
-  vol24: number
   /** volume dan fee per jendela waktu dari Meteora */
   windows: { label: string; volume: number; fees: number }[]
   fees24: number
@@ -133,7 +132,6 @@ export async function fetchPoolDetail(address: string): Promise<PoolDetail> {
     dynamicFee: Number(p.dynamic_fee_pct ?? 0),
     protocolFee: p.pool_config.protocol_fee_pct,
     tvl: Number(p.tvl),
-    vol24: Number(p.volume['24h']),
     windows: ['30m', '1h', '2h', '4h', '12h', '24h'].map((label) => ({ label, volume: Number(p.volume[label] ?? 0), fees: Number(p.fees[label] ?? 0) })),
     fees24: Number(p.fees['24h']),
     feeTvl24: Number(p.fee_tvl_ratio['24h']),
